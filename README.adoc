@@ -197,46 +197,52 @@ The following metrics are automatically exported when UNICAST3 is present in the
 |Metric Name |Type |Unit |Description |Significance
 
 |`jgroups.unicast3.messages.sent`
-|Gauge
+|Counter
 |`{messages}`
 |Total number of unicast messages sent
 |Throughput indicator for outgoing traffic
 
 |`jgroups.unicast3.messages.received`
-|Gauge
+|Counter
 |`{messages}`
 |Total number of unicast messages received
 |Throughput indicator for incoming traffic
 
 |`jgroups.unicast3.retransmissions`
-|Gauge
+|Counter
 |`{messages}`
 |Number of messages retransmitted
 |*Critical*: High values indicate network packet loss or congestion
 
 |`jgroups.unicast3.xmit_requests.sent`
-|Gauge
+|Counter
 |`{requests}`
 |Number of retransmit requests sent to other nodes
 |Indicates this node detected missing messages from senders
 
 |`jgroups.unicast3.xmit_requests.received`
-|Gauge
+|Counter
 |`{requests}`
 |Number of retransmit requests received from other nodes
 |Indicates other nodes are detecting packet loss from this node
 
 |`jgroups.unicast3.acks.sent`
-|Gauge
+|Counter
 |`{acks}`
 |Number of acknowledgments sent
 |Protocol overhead metric
 
 |`jgroups.unicast3.acks.received`
-|Gauge
+|Counter
 |`{acks}`
 |Number of acknowledgments received
 |Protocol overhead metric
+
+|`jgroups.unicast3.connections`
+|Gauge
+|`{connections}`
+|Total number of connections
+|Connection pool size (send + receive)
 
 |`jgroups.unicast3.connections.send`
 |Gauge

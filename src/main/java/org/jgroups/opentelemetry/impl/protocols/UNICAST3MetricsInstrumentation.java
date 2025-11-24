@@ -34,31 +34,31 @@ public class UNICAST3MetricsInstrumentation implements MetricsInstrumentation<UN
         RegistrationHelper helper = new RegistrationHelper(context);
 
         // Counter-based metrics (cumulative counts over time)
-        helper.registerLongGauge("messages.sent",
+        helper.registerLongCounter("messages.sent",
                 "Total number of unicast messages sent",
                 ObservableUnit.MESSAGES,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_msgs_sent")));
-        helper.registerLongGauge("messages.received",
+        helper.registerLongCounter("messages.received",
                 "Total number of unicast messages received",
                 ObservableUnit.MESSAGES,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_msgs_received")));
-        helper.registerLongGauge("retransmissions",
+        helper.registerLongCounter("retransmissions",
                 "Number of retransmitted messages (indicates network issues)",
                 ObservableUnit.MESSAGES,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_xmits")));
-        helper.registerLongGauge("xmit_requests.sent",
+        helper.registerLongCounter("xmit_requests.sent",
                 "Number of retransmit requests sent",
                 ObservableUnit.REQUESTS,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "xmit_reqs_sent")));
-        helper.registerLongGauge("xmit_requests.received",
+        helper.registerLongCounter("xmit_requests.received",
                 "Number of retransmit requests received",
                 ObservableUnit.REQUESTS,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "xmit_reqs_received")));
-        helper.registerLongGauge("acks.sent",
+        helper.registerLongCounter("acks.sent",
                 "Number of acknowledgments sent",
                 ObservableUnit.ACKS,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_acks_sent")));
-        helper.registerLongGauge("acks.received",
+        helper.registerLongCounter("acks.received",
                 "Number of acknowledgments received",
                 ObservableUnit.ACKS,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_acks_received")));
