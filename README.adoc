@@ -1,0 +1,364 @@
+:toc:
+
+= JGroups OpenTelemetry Integration
+
+Low-overhead OpenTelemetry metrics integration for JGroups with standardized names, UCUM units, and annotation-driven SPI for zero-configuration observability.
+
+**https://rhusar.github.io/jgroups-opentelemetry/[API Documentation (Javadoc)]**
+
+== Goals
+
+This project provides a native OpenTelemetry exporter for JGroups that:
+
+* *Standardized Metric Names*: Exports JGroups metrics with curated, semantic naming conventions that follow OpenTelemetry best practices
+* *Defined Units*: All metrics include proper UCUM units (e.g., `{messages}`, `{bytes}`, `{connections}`) for consistent interpretation across observability platforms
+* *Native Integration*: Integrates directly with the OpenTelemetry SDK without requiring JMX or external metric scrapers
+* *Zero Configuration Observability API*: Automatically discovers and exports metrics from JGroups protocols in the stack
+* *Extensible SPI*: Pluggable architecture using ServiceLoader allows custom protocol instrumentations to be added without modifying core code
+* *Production Ready*: Designed for high-throughput, low-overhead metric collection in production environments
+
+Unlike JMX-based monitoring, this integration provides:
+
+* Direct programmatic access to JGroups internals
+* Async metric collection with minimal performance impact
+* Native support for modern observability backends (Prometheus, Grafana, Datadog, etc.)
+* Semantic metric names aligned with OpenTelemetry conventions
+
+== Implementation Roadmap
+
+This project is designed with a multi-stage implementation approach to minimize changes to JGroups core while enabling future upstream integration.
+
+=== Stage 1: External Integration (Current)
+
+The current implementation operates entirely outside JGroups core:
+
+* *No JGroups modifications required*: This library works with unmodified JGroups releases
+* *Protocol-specific instrumentation*: Each protocol has a dedicated `MetricsInstrumentation` implementation (may use reflection to access internal fields)
+* *Manual metric registration*: Metrics are explicitly registered in instrumentation classes (skips potentially annotated but useless or derived metrics)
+* *Introduction of declarative, annotation-based approach*: e.g. `@Observable` annotation that can annotate fields and methods.
+
+
+This approach allows immediate deployment without waiting for JGroups upstream acceptance.
+
+==== Phase 2: Upstream Observability Annotations
+
+Move the `org.jgroups.annotations.observability` package to JGroups core:
+
+* Already uses the `org.jgroups.annotations` namespace for easy integration
+* No external dependencies (pure Java annotations), hi Bela :-)
+* Framework-agnostic design works with any metrics system while striving primarily for OpenTelemetry
+
+==== Phase 3: Annotate Protocol Metrics
+
+Internal and external protocol developers annotate observable fields and methods:
+
+[source,java]
+----
+public class OBSERVABLE_PROTOCOL extends Protocol {
+    @Observable(
+        name = "messages.sent",
+        type = ObservableType.COUNTER,
+        unit = ObservableUnit.MESSAGES,
+        description = "Total number of unicast messages sent"
+    )
+    protected final LongAdder num_msgs_sent = new LongAdder();
+}
+----
+
+==== Generic Metric Discovery
+
+Replace protocol-specific instrumentation with a single generic processor:
+
+* `ObservableMetricsInstrumentationProcessor` scans for `@Observable` annotations
+* Automatically registers metrics based on annotation metadata
+* No manual instrumentation code needed per protocol
+* Works across all metrics frameworks (OpenTelemetry, Micrometer, etc.)
+
+==== Benefits
+
+* *Single source of truth*: Metric definitions live with the code
+* *Maintainability*: Metrics evolve automatically with protocol changes
+* *Consistency*: Same metric definitions across all observability platforms
+* *Reduced boilerplate*: No manual instrumentation classes needed
+* *Type safety*: Compile-time validation of metric types and units
+
+==== Migration Path
+
+When JGroups adopts the SPI:
+
+1. Remove manual `MetricsInstrumentation` implementations (e.g., `UNICAST3MetricsInstrumentation`)
+2. Use generic `ObservableMetricsInstrumentationProcessor` for all protocols
+3. Maintain backward compatibility during transition
+4. Eventually remove reflection-based instrumentation
+
+This roadmap ensures the project can deliver value immediately while building toward a more elegant, upstream-integrated solution.
+
+NOTE: This will be moved to a separate DESIGN.adoc once this becomes irrelevant.
+
+== Usage
+
+=== Maven Dependency
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.jgroups.opentelemetry</groupId>
+    <artifactId>jgroups-opentelemetry</artifactId>
+    <version>1.0.0.Alpha1-SNAPSHOT</version>
+</dependency>
+----
+
+=== Adding to Protocol Stack
+
+Add the `OPENTELEMETRY` protocol to your JGroups configuration:
+
+[source,java]
+----
+// Configure OpenTelemetry SDK
+SdkMeterProvider meterProvider = SdkMeterProvider.builder()
+    .registerMetricReader(PeriodicMetricReader.builder(prometheusExporter)
+        .setInterval(Duration.ofSeconds(60))
+        .build())
+    .build();
+
+OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
+    .setMeterProvider(meterProvider)
+    .build();
+
+// Create OPENTELEMETRY protocol with OpenTelemetry instance
+OPENTELEMETRY otel = new OPENTELEMETRY()
+    .setOpenTelemetry(openTelemetry);
+
+// Add to protocol stack
+JChannel channel = new JChannel(
+    new UDP(),
+    new PING(),
+    new MERGE3(),
+    new FD_SOCK(),
+    new FD_ALL3(),
+    new VERIFY_SUSPECT(),
+    new NAKACK2(),
+    otel,              // OpenTelemetry protocol
+    new UNICAST3(),
+    new STABLE(),
+    new GMS(),
+    new UFC(),
+    new MFC(),
+    new FRAG2()
+).name("node1");
+
+channel.connect("my-cluster");
+----
+
+=== XML Configuration
+
+[source,xml]
+----
+<config>
+    <UDP />
+    <PING />
+    <MERGE3 />
+    <FD_SOCK />
+    <FD_ALL3 />
+    <VERIFY_SUSPECT />
+    <NAKACK2 />
+    <OPENTELEMETRY />
+    <UNICAST3 />
+    <STABLE />
+    <GMS />
+    <UFC />
+    <MFC />
+    <FRAG2 />
+</config>
+----
+
+== Protocol Configuration
+
+The `OPENTELEMETRY` protocol supports the following configuration properties:
+
+[cols="2,1,2,4"]
+|===
+|Property |Type |Default |Description
+
+|`instrumentationScopeName`
+|String
+|`org.jgroups`
+|Instrumentation scope name for the OpenTelemetry meter. Can be set via system property `jgroups.opentelemetry.scope_name` or environment variable `JGROUPS_OPENTELEMETRY_SCOPE_NAME`
+|===
+
+== Exported Metrics
+
+=== UNICAST3 Protocol Metrics
+
+The following metrics are automatically exported when UNICAST3 is present in the protocol stack:
+
+[cols="3,1,1,3,3"]
+|===
+|Metric Name |Type |Unit |Description |Significance
+
+|`jgroups.unicast3.messages.sent`
+|Gauge
+|`{messages}`
+|Total number of unicast messages sent
+|Throughput indicator for outgoing traffic
+
+|`jgroups.unicast3.messages.received`
+|Gauge
+|`{messages}`
+|Total number of unicast messages received
+|Throughput indicator for incoming traffic
+
+|`jgroups.unicast3.retransmissions`
+|Gauge
+|`{messages}`
+|Number of messages retransmitted
+|*Critical*: High values indicate network packet loss or congestion
+
+|`jgroups.unicast3.xmit_requests.sent`
+|Gauge
+|`{requests}`
+|Number of retransmit requests sent to other nodes
+|Indicates this node detected missing messages from senders
+
+|`jgroups.unicast3.xmit_requests.received`
+|Gauge
+|`{requests}`
+|Number of retransmit requests received from other nodes
+|Indicates other nodes are detecting packet loss from this node
+
+|`jgroups.unicast3.acks.sent`
+|Gauge
+|`{acks}`
+|Number of acknowledgments sent
+|Protocol overhead metric
+
+|`jgroups.unicast3.acks.received`
+|Gauge
+|`{acks}`
+|Number of acknowledgments received
+|Protocol overhead metric
+
+|`jgroups.unicast3.connections.send`
+|Gauge
+|`{connections}`
+|Number of active outgoing send connections
+|Connection pool size for sends
+
+|`jgroups.unicast3.connections.receive`
+|Gauge
+|`{connections}`
+|Number of active incoming receive connections
+|Connection pool size for receives
+
+|`jgroups.unicast3.messages.unacked`
+|Gauge
+|`{messages}`
+|Number of unacknowledged messages in send windows
+|*Critical*: Indicates backpressure or slow receivers
+
+|`jgroups.unicast3.xmit_table.missing_messages`
+|Gauge
+|`{messages}`
+|Number of missing (not yet received) messages in receive windows
+|*Critical*: Indicates gaps in message sequence
+
+|`jgroups.unicast3.xmit_table.undelivered_messages`
+|Gauge
+|`{messages}`
+|Total undelivered messages buffered in all receive windows
+|Memory pressure and delivery lag indicator
+|===
+
+=== JDBC_PING Protocol Metrics
+
+The following metrics are automatically exported when JDBC_PING is present in the protocol stack:
+
+[cols="3,1,1,3,3"]
+|===
+|Metric Name |Type |Unit |Description |Significance
+
+|`jgroups.jdbc_ping.writes`
+|Gauge
+|`{operations}`
+|Number of times discovery information was written
+|Database update frequency indicator
+
+|`jgroups.jdbc_ping.reads`
+|Gauge
+|`{operations}`
+|Number of times discovery information was read
+|Database query frequency indicator
+
+|`jgroups.jdbc_ping.discovery_requests`
+|Gauge
+|`{requests}`
+|Number of discovery requests sent
+|Discovery activity indicator
+|===
+
+=== VERIFY_SUSPECT2 Protocol Metrics
+
+The following metrics are automatically exported when VERIFY_SUSPECT2 is present in the protocol stack:
+
+[cols="3,1,1,3,3"]
+|===
+|Metric Name |Type |Unit |Description |Significance
+
+|`jgroups.verify_suspect2.suspects`
+|Gauge
+|`{members}`
+|Number of currently suspected members being verified
+|*Critical*: Indicates members under suspicion verification
+
+|`jgroups.verify_suspect2.verification_task_running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the verification task is currently running (1=running, 0=stopped)
+|Task activity indicator
+|===
+
+== Building
+
+[source,bash]
+----
+./mvnw clean install
+----
+
+== Requirements
+
+* Java 17 or higher
+* JGroups 5.4.4.Final or higher
+* OpenTelemetry Java SDK 1.44.1 or higher
+
+== Future Work
+
+=== Support for Fine-Grained Metric Control
+
+Add support for enabling/disabling individual metrics at runtime:
+
+* Add `enabled` parameter to `@Observable` annotation to allow metrics to be conditionally registered
+* Support configuration-based filtering (e.g., via property patterns or metric name prefixes)
+* Enable/disable metrics dynamically without requiring code changes or protocol restarts
+
+This would allow users to reduce overhead by disabling metrics they don't need while keeping the annotation metadata in place for documentation purposes.
+
+=== Create an Observability Best Practices Guide
+
+Create comprehensive documentation on monitoring JGroups clusters effectively:
+
+* *Main Performance Indicators*: Document critical metrics to watch for cluster health (e.g., retransmission rates, unacknowledged message counts, database operation failures)
+* *Problem Detection Patterns*: Identify metric patterns that indicate specific issues (e.g., high retransmissions suggesting network problems, growing unacked messages indicating backpressure)
+* *Remediation Strategies*: Provide actionable solutions for common problems detected through metrics
+* *Alert Thresholds*: Recommend baseline alert thresholds for production environments
+* *Troubleshooting Workflows*: Step-by-step guides for diagnosing issues using metric correlations
+* *Performance Tuning*: Best practices for optimizing JGroups configuration based on observed metrics
+
+This would help operators move from raw metric collection to actionable insights, enabling proactive issue detection and faster incident resolution.
+
+== License
+
+Licensed under the Apache License, Version 2.0. See link:LICENSE[LICENSE] file for details.
+
+== Contributing
+
+Contributions are welcome! Please submit issues and pull requests on GitHub.
