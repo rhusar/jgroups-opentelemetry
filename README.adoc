@@ -172,6 +172,50 @@ channel.connect("my-cluster");
 </config>
 ----
 
+=== Programmatic Registration Without Protocol
+
+For use cases without adding the OPENTELEMETRY protocol to the protocol stack, you can use `MetricsRegistrar` directly:
+
+[source,java]
+----
+import org.jgroups.opentelemetry.impl.MetricsRegistrar;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import org.jgroups.JChannel;
+
+// Configure OpenTelemetry SDK
+SdkMeterProvider meterProvider = SdkMeterProvider.builder()
+    .registerMetricReader(PeriodicMetricReader.builder(prometheusExporter)
+        .setInterval(Duration.ofSeconds(60))
+        .build())
+    .build();
+
+OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
+    .setMeterProvider(meterProvider)
+    .build();
+
+// Create your JChannel without OPENTELEMETRY protocol
+JChannel channel = new JChannel(
+    new UDP(),
+    new PING(),
+    new NAKACK2(),
+    new UNICAST3(),
+    new STABLE(),
+    new GMS()
+).name("node1");
+
+// Connect the channel
+channel.connect("my-cluster");
+
+// Register metrics programmatically
+MetricsRegistrar.registerMetrics(
+    openTelemetry,
+    channel.getProtocolStack(),
+    "org.jgroups"  // instrumentation scope name
+);
+----
+
 == Protocol Configuration
 
 The `OPENTELEMETRY` protocol supports the following configuration properties:
