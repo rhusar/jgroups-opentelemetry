@@ -319,32 +319,6 @@ The following metrics are automatically exported when UNICAST3 is present in the
 |Memory pressure and delivery lag indicator
 |===
 
-=== JDBC_PING Protocol Metrics
-
-The following metrics are automatically exported when JDBC_PING is present in the protocol stack:
-
-[cols="3,1,1,3,3"]
-|===
-|Metric Name |Type |Unit |Description |Significance
-
-|`jgroups.jdbc_ping.writes`
-|Gauge
-|`{operations}`
-|Number of times discovery information was written
-|Database update frequency indicator
-
-|`jgroups.jdbc_ping.reads`
-|Gauge
-|`{operations}`
-|Number of times discovery information was read
-|Database query frequency indicator
-
-|`jgroups.jdbc_ping.discovery_requests`
-|Gauge
-|`{requests}`
-|Number of discovery requests sent
-|Discovery activity indicator
-|===
 
 === VERIFY_SUSPECT2 Protocol Metrics
 
@@ -365,6 +339,57 @@ The following metrics are automatically exported when VERIFY_SUSPECT2 is present
 |`1` (dimensionless)
 |Indicates whether the verification task is currently running (1=running, 0=stopped)
 |Task activity indicator
+|===
+
+
+=== FILE_PING-Based Discovery Protocol Metrics (Common)
+
+The following metrics are automatically exported for all FILE_PING-based discovery protocols (FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING):
+
+[cols="3,1,1,3,3"]
+|===
+|Metric Name |Type |Unit |Description |Significance
+
+|`jgroups.<protocol>.writes`
+|Gauge
+|`{operations}`
+|Number of times discovery information was written
+|Storage update frequency indicator (database, filesystem, cloud storage, etc.)
+
+|`jgroups.<protocol>.reads`
+|Gauge
+|`{operations}`
+|Number of times discovery information was read
+|Storage read frequency indicator
+
+|`jgroups.<protocol>.is_coord`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator)
+|Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.file_ping.is_coord`, `jgroups.jdbc_ping.is_coord`)
+|===
+
+NOTE: FILE_PING-based protocols use persistent storage (file system, database, cloud storage) to share cluster membership information. The `writes` and `reads` metrics help monitor the frequency of storage operations, which can be important for troubleshooting discovery issues or optimizing storage backend performance.
+
+=== Discovery Protocol Metrics (Common)
+
+The following metrics are automatically exported for all Discovery-based protocols (PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PING, and all FILE_PING-based protocols listed above):
+
+[cols="3,1,1,3,3"]
+|===
+|Metric Name |Type |Unit |Description |Significance
+
+|`jgroups.<protocol>.is_coord`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator)
+|Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.ping.is_coord`, `jgroups.dns_ping.is_coord`)
+
+|`jgroups.<protocol>.discovery_requests`
+|Gauge
+|`{requests}`
+|Number of discovery requests sent
+|Discovery activity indicator. Tracks how often this node initiates discovery to find cluster members
 |===
 
 == Building

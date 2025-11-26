@@ -23,6 +23,26 @@ public final class ReflectionHelper {
     }
 
     /**
+     * Finds a field in the class hierarchy by walking up from the given class to its superclasses.
+     * This is necessary because getDeclaredField() only looks in the specified class, not in superclasses.
+     *
+     * @param clazz The starting class
+     * @param fieldName The name of the field to find
+     * @return The Field object, or null if not found
+     */
+    private static Field findField(Class<?> clazz, String fieldName) {
+        Class<?> current = clazz;
+        while (current != null) {
+            try {
+                return current.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                current = current.getSuperclass();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Uses reflection to access protected LongAdder fields in a protocol.
      * This is necessary because fields like num_msgs_sent are not exposed via public methods.
      *
@@ -32,7 +52,13 @@ public final class ReflectionHelper {
      */
     public static long getLongAdderValue(Protocol protocol, String fieldName) {
         try {
-            Field field = protocol.getClass().getDeclaredField(fieldName);
+            Field field = findField(protocol.getClass(), fieldName);
+            if (field == null) {
+                if (log.isDebugEnabled()) {
+                    log.warn("field %s not found in %s or its superclasses", fieldName, protocol.getClass().getSimpleName());
+                }
+                return 0;
+            }
             field.setAccessible(true);
             LongAdder adder = (LongAdder) field.get(protocol);
             return adder != null ? adder.sum() : 0;
@@ -54,7 +80,13 @@ public final class ReflectionHelper {
      */
     public static int getIntValue(Protocol protocol, String fieldName) {
         try {
-            Field field = protocol.getClass().getDeclaredField(fieldName);
+            Field field = findField(protocol.getClass(), fieldName);
+            if (field == null) {
+                if (log.isDebugEnabled()) {
+                    log.warn("field %s not found in %s or its superclasses", fieldName, protocol.getClass().getSimpleName());
+                }
+                return 0;
+            }
             field.setAccessible(true);
             return field.getInt(protocol);
         } catch (Exception e) {
@@ -75,7 +107,13 @@ public final class ReflectionHelper {
      */
     public static boolean getBooleanValue(Protocol protocol, String fieldName) {
         try {
-            Field field = protocol.getClass().getDeclaredField(fieldName);
+            Field field = findField(protocol.getClass(), fieldName);
+            if (field == null) {
+                if (log.isDebugEnabled()) {
+                    log.warn("field %s not found in %s or its superclasses", fieldName, protocol.getClass().getSimpleName());
+                }
+                return false;
+            }
             field.setAccessible(true);
             return field.getBoolean(protocol);
         } catch (Exception e) {
@@ -96,7 +134,13 @@ public final class ReflectionHelper {
      */
     public static int getSetSize(Protocol protocol, String fieldName) {
         try {
-            Field field = protocol.getClass().getDeclaredField(fieldName);
+            Field field = findField(protocol.getClass(), fieldName);
+            if (field == null) {
+                if (log.isDebugEnabled()) {
+                    log.warn("field %s not found in %s or its superclasses", fieldName, protocol.getClass().getSimpleName());
+                }
+                return 0;
+            }
             field.setAccessible(true);
             Object value = field.get(protocol);
             if (value instanceof Set) {

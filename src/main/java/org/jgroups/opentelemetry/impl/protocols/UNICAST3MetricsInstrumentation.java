@@ -1,8 +1,6 @@
 package org.jgroups.opentelemetry.impl.protocols;
 
 import org.jgroups.annotations.observability.ObservableUnit;
-import org.jgroups.logging.Log;
-import org.jgroups.logging.LogFactory;
 import org.jgroups.opentelemetry.impl.util.ReflectionHelper;
 import org.jgroups.opentelemetry.impl.util.RegistrationHelper;
 import org.jgroups.opentelemetry.spi.MetricsInstrumentation;
@@ -11,23 +9,13 @@ import org.jgroups.protocols.UNICAST3;
 import org.kohsuke.MetaInfServices;
 
 /**
- * Instruments the UNICAST3 protocol with OpenTelemetry metrics.
- * Registers metric instruments that expose UNICAST3 internal state with
- * standardized names and units.
- *
- * <p>This class is stateless and automatically discovered via ServiceLoader.</p>
+ * Metrics instrumentation for {@link UNICAST3}.
  *
  * @author Radoslav Husar
  */
 @MetaInfServices(MetricsInstrumentation.class)
 public class UNICAST3MetricsInstrumentation implements MetricsInstrumentation<UNICAST3> {
 
-    private final Log log = LogFactory.getLog(this.getClass());
-
-    /**
-     * Registers all UNICAST3 metrics with OpenTelemetry.
-     * Metric values are read asynchronously via callbacks.
-     */
     @Override
     public void registerMetrics(InstrumentationContext context) {
         UNICAST3 protocol = (UNICAST3) context.protocol();
@@ -88,7 +76,5 @@ public class UNICAST3MetricsInstrumentation implements MetricsInstrumentation<UN
                 "Number of undelivered messages in all receive windows",
                 ObservableUnit.MESSAGES,
                 measurement -> measurement.record(protocol.getXmitTableUndeliveredMessages()));
-
-        log.debug("registered UNICAST3 metrics with OpenTelemetry");
     }
 }

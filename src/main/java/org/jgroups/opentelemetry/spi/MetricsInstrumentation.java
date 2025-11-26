@@ -51,19 +51,61 @@ public interface MetricsInstrumentation<T extends Protocol> {
      */
     @SuppressWarnings("unchecked")
     default Class<T> getProtocolClass() {
-        // Examine the generic interfaces to find MetricsInstrumentation<T>
-        Type[] interfaces = getClass().getGenericInterfaces();
-        for (Type iface : interfaces) {
-            if (iface instanceof ParameterizedType paramType) {
-                if (paramType.getRawType() == MetricsInstrumentation.class) {
-                    Type typeArg = paramType.getActualTypeArguments()[0];
-                    if (typeArg instanceof Class) {
-                        return (Class<T>) typeArg;
+        // Walk up the class hierarchy to find MetricsInstrumentation<T>
+        Class<?> currentClass = getClass();
+        while (currentClass != null) {
+            // Check interfaces at this level
+            Type[] interfaces = currentClass.getGenericInterfaces();
+            for (Type iface : interfaces) {
+                if (iface instanceof ParameterizedType paramType) {
+                    if (paramType.getRawType() == MetricsInstrumentation.class) {
+                        Type typeArg = paramType.getActualTypeArguments()[0];
+                        if (typeArg instanceof Class) {
+                            return (Class<T>) typeArg;
+                        }
                     }
                 }
             }
+
+            // Check the generic superclass
+            Type superType = currentClass.getGenericSuperclass();
+            if (superType instanceof ParameterizedType paramType) {
+                Type rawType = paramType.getRawType();
+                if (rawType instanceof Class<?> superClass) {
+                    // Check if the superclass (or its ancestors) implements MetricsInstrumentation
+                    if (implementsMetricsInstrumentation(superClass)) {
+                        // Found it in superclass hierarchy, get the type argument from current level
+                        Type typeArg = paramType.getActualTypeArguments()[0];
+                        if (typeArg instanceof Class) {
+                            return (Class<T>) typeArg;
+                        }
+                    }
+                }
+            }
+
+            // Move up the hierarchy
+            currentClass = currentClass.getSuperclass();
         }
         throw new IllegalStateException("Could not determine protocol class for " + getClass().getName());
+    }
+
+    /**
+     * Helper method to check if a class (or its ancestors) implements MetricsInstrumentation.
+     */
+    private boolean implementsMetricsInstrumentation(Class<?> clazz) {
+        if (clazz == null || clazz == Object.class) {
+            return false;
+        }
+
+        // Check direct interfaces
+        for (Class<?> iface : clazz.getInterfaces()) {
+            if (iface == MetricsInstrumentation.class) {
+                return true;
+            }
+        }
+
+        // Recursively check superclass
+        return implementsMetricsInstrumentation(clazz.getSuperclass());
     }
 
     /**

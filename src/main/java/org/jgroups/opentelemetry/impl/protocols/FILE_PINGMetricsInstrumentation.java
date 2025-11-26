@@ -1,23 +1,22 @@
 package org.jgroups.opentelemetry.impl.protocols;
 
-import org.jgroups.opentelemetry.spi.MetricsInstrumentation;
 import org.jgroups.opentelemetry.spi.InstrumentationContext;
-import org.jgroups.protocols.JDBC_PING;
+import org.jgroups.protocols.FILE_PING;
 import org.kohsuke.MetaInfServices;
 
 /**
- * Metrics instrumentation for {@link JDBC_PING}.
+ * Metrics instrumentation for {@link FILE_PING}.
  *
  * @author Radoslav Husar
  */
-@MetaInfServices(MetricsInstrumentation.class)
-public class JDBC_PINGMetricsInstrumentation extends AbstractFilePingMetricsInstrumentation<JDBC_PING> {
+@MetaInfServices(org.jgroups.opentelemetry.spi.MetricsInstrumentation.class)
+public class FILE_PINGMetricsInstrumentation extends AbstractFilePingMetricsInstrumentation<FILE_PING> {
 
     @Override
     public void registerMetrics(InstrumentationContext context) {
         // Register common FILE_PING metrics (which includes Discovery metrics)
         super.registerMetrics(context);
 
-        // Add JDBC_PING-specific metrics here if needed in the future
+        // Add FILE_PING-specific metrics here if needed in the future
     }
 }

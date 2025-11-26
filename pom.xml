@@ -81,6 +81,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- H2 Database for JDBC_PING tests -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.3.232</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Kohsuke MetaInfServices for automatic ServiceLoader registration -->
         <dependency>
             <groupId>org.kohsuke.metainf-services</groupId>

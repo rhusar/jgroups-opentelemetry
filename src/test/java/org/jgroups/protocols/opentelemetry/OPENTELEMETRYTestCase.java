@@ -4,13 +4,9 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
-import io.opentelemetry.sdk.metrics.InstrumentType;
-import io.opentelemetry.sdk.common.CompletableResultCode;
 import org.jgroups.JChannel;
 import org.jgroups.ObjectMessage;
+import org.jgroups.opentelemetry.TestMetricExporter;
 import org.jgroups.protocols.*;
 import org.jgroups.protocols.pbcast.GMS;
 import org.jgroups.protocols.pbcast.NAKACK2;
@@ -148,37 +144,5 @@ class OPENTELEMETRYTestCase {
             new GMS(),
             new FRAG2()
         ).name(name);
-    }
-
-    /**
-     * Simple test metric exporter for capturing metrics in tests.
-     */
-    private static class TestMetricExporter implements MetricExporter {
-        private final List<Collection<MetricData>> exports = new ArrayList<>();
-
-        @Override
-        public CompletableResultCode export(Collection<MetricData> metrics) {
-            exports.add(metrics);
-            return CompletableResultCode.ofSuccess();
-        }
-
-        @Override
-        public CompletableResultCode flush() {
-            return CompletableResultCode.ofSuccess();
-        }
-
-        @Override
-        public CompletableResultCode shutdown() {
-            return CompletableResultCode.ofSuccess();
-        }
-
-        @Override
-        public AggregationTemporality getAggregationTemporality(InstrumentType instrumentType) {
-            return AggregationTemporality.CUMULATIVE;
-        }
-
-        public List<Collection<MetricData>> getExports() {
-            return exports;
-        }
     }
 }
