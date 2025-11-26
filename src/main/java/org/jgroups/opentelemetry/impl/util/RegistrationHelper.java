@@ -2,6 +2,7 @@ package org.jgroups.opentelemetry.impl.util;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongHistogram;
+import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import org.jgroups.annotations.observability.ObservableUnit;
 import org.jgroups.opentelemetry.spi.InstrumentationContext;
@@ -14,6 +15,7 @@ import java.util.function.Consumer;
  *
  * @author Radoslav Husar
  */
+@SuppressWarnings({"resource", "ClassCanBeRecord"})
 public final class RegistrationHelper {
 
     private final InstrumentationContext context;
@@ -47,7 +49,29 @@ public final class RegistrationHelper {
             .setDescription(description)
             .setUnit(unit.toString())
             .ofLongs()
-            .buildWithCallback(measurement -> callback.accept(new ObservableLongMeasurementWrapper(measurement, context)));
+            .buildWithCallback(measurement -> callback.accept(new AttributeAppendingObservableLongMeasurementWrapper(measurement, context)));
+    }
+
+    /**
+     * Registers a double gauge metric with the OpenTelemetry meter.
+     * This is a convenience method that wraps the common pattern of creating
+     * a gauge builder, configuring it, and building it with a callback.
+     * The full metric name is constructed by prepending the protocol prefix from the context.
+     * The callback is automatically wrapped to attach context attributes (e.g., cluster name) to measurements.
+     *
+     * @param nameComponent The metric name component (e.g., "avg_queue_size"), will be prefixed with the protocol prefix
+     * @param description A human-readable description of the metric
+     * @param unit The unit of measurement from {@link ObservableUnit}
+     * @param callback The callback that records the metric value
+     */
+    public void registerDoubleGauge(String nameComponent, String description, ObservableUnit unit, Consumer<ObservableDoubleMeasurement> callback) {
+        String fullName = context.getPrefix() + nameComponent;
+
+        context.meter()
+            .gaugeBuilder(fullName)
+            .setDescription(description)
+            .setUnit(unit.toString())
+            .buildWithCallback(measurement -> callback.accept(new AttributeAppendingObservableDoubleMeasurementWrapper(measurement, context)));
     }
 
     /**
@@ -68,7 +92,7 @@ public final class RegistrationHelper {
             .counterBuilder(fullName)
             .setDescription(description)
             .setUnit(unit.toString())
-            .buildWithCallback(measurement -> callback.accept(new ObservableLongMeasurementWrapper(measurement, context)));
+            .buildWithCallback(measurement -> callback.accept(new AttributeAppendingObservableLongMeasurementWrapper(measurement, context)));
     }
 
     /**
@@ -89,7 +113,7 @@ public final class RegistrationHelper {
             .upDownCounterBuilder(fullName)
             .setDescription(description)
             .setUnit(unit.toString())
-            .buildWithCallback(measurement -> callback.accept(new ObservableLongMeasurementWrapper(measurement, context)));
+            .buildWithCallback(measurement -> callback.accept(new AttributeAppendingObservableLongMeasurementWrapper(measurement, context)));
     }
 
     /**
@@ -116,11 +140,11 @@ public final class RegistrationHelper {
     /**
      * Wrapper for ObservableLongMeasurement that automatically attaches context attributes.
      */
-    private static class ObservableLongMeasurementWrapper implements ObservableLongMeasurement {
+    private static class AttributeAppendingObservableLongMeasurementWrapper implements ObservableLongMeasurement {
         private final ObservableLongMeasurement delegate;
         private final Attributes attributes;
 
-        ObservableLongMeasurementWrapper(ObservableLongMeasurement delegate, InstrumentationContext context) {
+        AttributeAppendingObservableLongMeasurementWrapper(ObservableLongMeasurement delegate, InstrumentationContext context) {
             this.delegate = delegate;
             this.attributes = context.getAttributes();
         }
@@ -132,6 +156,29 @@ public final class RegistrationHelper {
 
         @Override
         public void record(long value, Attributes attributes) {
+            delegate.record(value, attributes);
+        }
+    }
+
+    /**
+     * Wrapper for ObservableDoubleMeasurement that automatically attaches context attributes.
+     */
+    private static class AttributeAppendingObservableDoubleMeasurementWrapper implements ObservableDoubleMeasurement {
+        private final ObservableDoubleMeasurement delegate;
+        private final Attributes attributes;
+
+        AttributeAppendingObservableDoubleMeasurementWrapper(ObservableDoubleMeasurement delegate, InstrumentationContext context) {
+            this.delegate = delegate;
+            this.attributes = context.getAttributes();
+        }
+
+        @Override
+        public void record(double value) {
+            delegate.record(value, attributes);
+        }
+
+        @Override
+        public void record(double value, Attributes attributes) {
             delegate.record(value, attributes);
         }
     }

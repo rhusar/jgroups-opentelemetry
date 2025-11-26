@@ -125,6 +125,60 @@ public final class ReflectionHelper {
     }
 
     /**
+     * Uses reflection to access protected long fields in a protocol.
+     * This is necessary because fields are not exposed via public methods.
+     *
+     * @param protocol The protocol instance
+     * @param fieldName The name of the long field to read
+     * @return The current value of the long field, or 0 if the field cannot be accessed
+     */
+    public static long getLongValue(Protocol protocol, String fieldName) {
+        try {
+            Field field = findField(protocol.getClass(), fieldName);
+            if (field == null) {
+                if (log.isDebugEnabled()) {
+                    log.warn("field %s not found in %s or its superclasses", fieldName, protocol.getClass().getSimpleName());
+                }
+                return 0;
+            }
+            field.setAccessible(true);
+            return field.getLong(protocol);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.warn("failed to read %s field %s: %s", protocol.getClass().getSimpleName(), fieldName, e.getMessage());
+            }
+            return 0;
+        }
+    }
+
+    /**
+     * Uses reflection to access protected double fields in a protocol.
+     * This is necessary because fields are not exposed via public methods.
+     *
+     * @param protocol The protocol instance
+     * @param fieldName The name of the double field to read
+     * @return The current value of the double field, or 0.0 if the field cannot be accessed
+     */
+    public static double getDoubleValue(Protocol protocol, String fieldName) {
+        try {
+            Field field = findField(protocol.getClass(), fieldName);
+            if (field == null) {
+                if (log.isDebugEnabled()) {
+                    log.warn("field %s not found in %s or its superclasses", fieldName, protocol.getClass().getSimpleName());
+                }
+                return 0.0;
+            }
+            field.setAccessible(true);
+            return field.getDouble(protocol);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.warn("failed to read %s field %s: %s", protocol.getClass().getSimpleName(), fieldName, e.getMessage());
+            }
+            return 0.0;
+        }
+    }
+
+    /**
      * Uses reflection to access protected Set fields and return their size.
      * This is necessary because fields are not exposed via public methods.
      *
