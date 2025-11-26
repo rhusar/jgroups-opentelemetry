@@ -1,8 +1,6 @@
 package org.jgroups.opentelemetry.impl.protocols;
 
 import org.jgroups.annotations.observability.ObservableUnit;
-import org.jgroups.logging.Log;
-import org.jgroups.logging.LogFactory;
 import org.jgroups.opentelemetry.impl.util.ReflectionHelper;
 import org.jgroups.opentelemetry.impl.util.RegistrationHelper;
 import org.jgroups.opentelemetry.spi.InstrumentationContext;

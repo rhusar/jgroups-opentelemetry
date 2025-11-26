@@ -239,8 +239,6 @@ The `OPENTELEMETRY` protocol supports the following configuration properties:
 
 === UNICAST3 Protocol Metrics
 
-The following metrics are automatically exported when UNICAST3 is present in the protocol stack:
-
 [cols="3,1,1,5"]
 |===
 |Metric Name |Type |Unit |Description
@@ -314,8 +312,6 @@ The following metrics are automatically exported when UNICAST3 is present in the
 
 === VERIFY_SUSPECT2 Protocol Metrics
 
-The following metrics are automatically exported when VERIFY_SUSPECT2 is present in the protocol stack:
-
 [cols="3,1,1,5"]
 |===
 |Metric Name |Type |Unit |Description
@@ -334,7 +330,7 @@ The following metrics are automatically exported when VERIFY_SUSPECT2 is present
 
 === FILE_PING-Based Discovery Protocol Metrics (Common)
 
-The following metrics are automatically exported for all FILE_PING-based discovery protocols (FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING):
+Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 [cols="3,1,1,5"]
 |===
@@ -360,7 +356,7 @@ NOTE: FILE_PING-based protocols use persistent storage (file system, database, c
 
 === Discovery Protocol Metrics (Common)
 
-The following metrics are automatically exported for all Discovery-based protocols (PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PING, and all FILE_PING-based protocols listed above):
+Applies to: PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PING, and all FILE_PING-based protocols listed above
 
 [cols="3,1,1,5"]
 |===
@@ -375,6 +371,53 @@ The following metrics are automatically exported for all Discovery-based protoco
 |Gauge
 |`{requests}`
 |Number of discovery requests sent. Discovery activity indicator. Tracks how often this node initiates discovery to find cluster members
+|===
+
+=== MERGE3 Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.merge3.views.cached`
+|Gauge
+|`1` (dimensionless)
+|Number of cached ViewIds from different subgroups. Indicates potential network partitions detected
+
+|`jgroups.merge3.merge_events`
+|Counter
+|`1` (dimensionless)
+|Number of times a MERGE event was sent up the stack. Tracks merge operations initiated
+
+|`jgroups.merge3.view_consistency_checker.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the view consistency checker task is running (1=running, 0=stopped). Task activity indicator
+
+|`jgroups.merge3.info_sender.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the info sender task is running (1=running, 0=stopped). Task activity indicator
+
+|`jgroups.merge3.interval.min`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Minimum time in milliseconds before sending an info message
+
+|`jgroups.merge3.interval.max`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Maximum interval in milliseconds when the next info message will be sent
+
+|`jgroups.merge3.interval.check`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Interval in milliseconds after which we check for view inconsistencies
+
+|`jgroups.merge3.max_participants_in_merge`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Maximum number of merge participants to be involved in a merge (0=unlimited)
 |===
 
 == Building
