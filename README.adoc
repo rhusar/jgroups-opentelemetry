@@ -241,87 +241,74 @@ The `OPENTELEMETRY` protocol supports the following configuration properties:
 
 The following metrics are automatically exported when UNICAST3 is present in the protocol stack:
 
-[cols="3,1,1,3,3"]
+[cols="3,1,1,5"]
 |===
-|Metric Name |Type |Unit |Description |Significance
+|Metric Name |Type |Unit |Description
 
 |`jgroups.unicast3.messages.sent`
 |Counter
 |`{messages}`
-|Total number of unicast messages sent
-|Throughput indicator for outgoing traffic
+|Total number of unicast messages sent. Throughput indicator for outgoing traffic
 
 |`jgroups.unicast3.messages.received`
 |Counter
 |`{messages}`
-|Total number of unicast messages received
-|Throughput indicator for incoming traffic
+|Total number of unicast messages received. Throughput indicator for incoming traffic
 
 |`jgroups.unicast3.retransmissions`
 |Counter
 |`{messages}`
-|Number of messages retransmitted
-|*Critical*: High values indicate network packet loss or congestion
+|Number of messages retransmitted. *Critical*: High values indicate network packet loss or congestion
 
 |`jgroups.unicast3.xmit_requests.sent`
 |Counter
 |`{requests}`
-|Number of retransmit requests sent to other nodes
-|Indicates this node detected missing messages from senders
+|Number of retransmit requests sent to other nodes. Indicates this node detected missing messages from senders
 
 |`jgroups.unicast3.xmit_requests.received`
 |Counter
 |`{requests}`
-|Number of retransmit requests received from other nodes
-|Indicates other nodes are detecting packet loss from this node
+|Number of retransmit requests received from other nodes. Indicates other nodes are detecting packet loss from this node
 
 |`jgroups.unicast3.acks.sent`
 |Counter
 |`{acks}`
-|Number of acknowledgments sent
-|Protocol overhead metric
+|Number of acknowledgments sent. Protocol overhead metric
 
 |`jgroups.unicast3.acks.received`
 |Counter
 |`{acks}`
-|Number of acknowledgments received
-|Protocol overhead metric
+|Number of acknowledgments received. Protocol overhead metric
 
 |`jgroups.unicast3.connections`
 |Gauge
 |`{connections}`
-|Total number of connections
-|Connection pool size (send + receive)
+|Total number of connections. Connection pool size (send + receive)
 
 |`jgroups.unicast3.connections.send`
 |Gauge
 |`{connections}`
-|Number of active outgoing send connections
-|Connection pool size for sends
+|Number of active outgoing send connections. Connection pool size for sends
 
 |`jgroups.unicast3.connections.receive`
 |Gauge
 |`{connections}`
-|Number of active incoming receive connections
-|Connection pool size for receives
+|Number of active incoming receive connections. Connection pool size for receives
 
 |`jgroups.unicast3.messages.unacked`
 |Gauge
 |`{messages}`
-|Number of unacknowledged messages in send windows
-|*Critical*: Indicates backpressure or slow receivers
+|Number of unacknowledged messages in send windows. *Critical*: Indicates backpressure or slow receivers
 
 |`jgroups.unicast3.xmit_table.missing_messages`
 |Gauge
 |`{messages}`
-|Number of missing (not yet received) messages in receive windows
-|*Critical*: Indicates gaps in message sequence
+|Number of missing (not yet received) messages in receive windows. *Critical*: Indicates gaps in message sequence
 
 |`jgroups.unicast3.xmit_table.undelivered_messages`
 |Gauge
 |`{messages}`
-|Total undelivered messages buffered in all receive windows
-|Memory pressure and delivery lag indicator
+|Total undelivered messages buffered in all receive windows. Memory pressure and delivery lag indicator
 |===
 
 
@@ -329,21 +316,19 @@ The following metrics are automatically exported when UNICAST3 is present in the
 
 The following metrics are automatically exported when VERIFY_SUSPECT2 is present in the protocol stack:
 
-[cols="3,1,1,3,3"]
+[cols="3,1,1,5"]
 |===
-|Metric Name |Type |Unit |Description |Significance
+|Metric Name |Type |Unit |Description
 
 |`jgroups.verify_suspect2.suspects`
 |Gauge
 |`{members}`
-|Number of currently suspected members being verified
-|*Critical*: Indicates members under suspicion verification
+|Number of currently suspected members being verified. *Critical*: Indicates members under suspicion verification
 
 |`jgroups.verify_suspect2.verification_task_running`
 |Gauge
 |`1` (dimensionless)
-|Indicates whether the verification task is currently running (1=running, 0=stopped)
-|Task activity indicator
+|Indicates whether the verification task is currently running (1=running, 0=stopped). Task activity indicator
 |===
 
 
@@ -351,27 +336,24 @@ The following metrics are automatically exported when VERIFY_SUSPECT2 is present
 
 The following metrics are automatically exported for all FILE_PING-based discovery protocols (FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING):
 
-[cols="3,1,1,3,3"]
+[cols="3,1,1,5"]
 |===
-|Metric Name |Type |Unit |Description |Significance
+|Metric Name |Type |Unit |Description
 
 |`jgroups.<protocol>.writes`
 |Gauge
 |`{operations}`
-|Number of times discovery information was written
-|Storage update frequency indicator (database, filesystem, cloud storage, etc.)
+|Number of times discovery information was written. Storage update frequency indicator (database, filesystem, cloud storage, etc.)
 
 |`jgroups.<protocol>.reads`
 |Gauge
 |`{operations}`
-|Number of times discovery information was read
-|Storage read frequency indicator
+|Number of times discovery information was read. Storage read frequency indicator
 
 |`jgroups.<protocol>.is_coord`
 |Gauge
 |`1` (dimensionless)
-|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator)
-|Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.file_ping.is_coord`, `jgroups.jdbc_ping.is_coord`)
+|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.file_ping.is_coord`, `jgroups.jdbc_ping.is_coord`)
 |===
 
 NOTE: FILE_PING-based protocols use persistent storage (file system, database, cloud storage) to share cluster membership information. The `writes` and `reads` metrics help monitor the frequency of storage operations, which can be important for troubleshooting discovery issues or optimizing storage backend performance.
@@ -380,21 +362,19 @@ NOTE: FILE_PING-based protocols use persistent storage (file system, database, c
 
 The following metrics are automatically exported for all Discovery-based protocols (PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PING, and all FILE_PING-based protocols listed above):
 
-[cols="3,1,1,3,3"]
+[cols="3,1,1,5"]
 |===
-|Metric Name |Type |Unit |Description |Significance
+|Metric Name |Type |Unit |Description
 
 |`jgroups.<protocol>.is_coord`
 |Gauge
 |`1` (dimensionless)
-|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator)
-|Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.ping.is_coord`, `jgroups.dns_ping.is_coord`)
+|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.ping.is_coord`, `jgroups.dns_ping.is_coord`)
 
 |`jgroups.<protocol>.discovery_requests`
 |Gauge
 |`{requests}`
-|Number of discovery requests sent
-|Discovery activity indicator. Tracks how often this node initiates discovery to find cluster members
+|Number of discovery requests sent. Discovery activity indicator. Tracks how often this node initiates discovery to find cluster members
 |===
 
 == Building
