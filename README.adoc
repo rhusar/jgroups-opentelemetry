@@ -420,6 +420,139 @@ Applies to: PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PI
 |Maximum number of merge participants to be involved in a merge (0=unlimited)
 |===
 
+=== FD_SOCK Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.fd_sock.suspects`
+|Gauge
+|`1` (dimensionless)
+|Number of currently suspected members
+
+|`jgroups.fd_sock.suspect_events`
+|Counter
+|`1` (dimensionless)
+|Number of suspect events generated
+
+|`jgroups.fd_sock.monitor.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the node crash detection monitor is running (1=running, 0=stopped)
+
+|`jgroups.fd_sock.timeout.get_cache`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Timeout for getting socket cache from coordinator
+
+|`jgroups.fd_sock.timeout.sock_conn`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Maximum time to wait for ping Socket.connect() to return
+
+|`jgroups.fd_sock.interval.suspect_msg`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Interval for broadcasting suspect messages
+
+|`jgroups.fd_sock.cache.max_elements`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Maximum number of elements in the cache until deleted elements are removed
+
+|`jgroups.fd_sock.cache.max_age`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Maximum age an element marked as removed has to have until it is removed
+
+|`jgroups.fd_sock.num_tries`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Number of attempts coordinator is solicited for socket cache until we give up
+
+|`jgroups.fd_sock.port.start`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Start port for server socket (0 picks random port)
+
+|`jgroups.fd_sock.port.client_bind`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Start port for client socket (0 picks random port)
+
+|`jgroups.fd_sock.port.range`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Number of ports to probe for start_port and client_bind_port
+
+|`jgroups.fd_sock.keep_alive`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Whether to use KEEP_ALIVE on the ping socket (1=enabled, 0=disabled)
+|===
+
+NOTE: FD_SOCK uses TCP sockets for ring-based failure detection. Each member monitors its neighbor on the right by maintaining a socket connection. Socket closure indicates failure. The configuration metrics help tune connection parameters and cache behavior.
+
+=== FD_SOCK2 Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.fd_sock2.suspects`
+|Gauge
+|`1` (dimensionless)
+|Number of currently suspected members
+
+|`jgroups.fd_sock2.suspect_events`
+|Counter
+|`1` (dimensionless)
+|Number of suspect events generated
+
+|`jgroups.fd_sock2.offset`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Offset from the transport's bind port
+
+|`jgroups.fd_sock2.port.range`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Number of ports to probe for finding a free port
+
+|`jgroups.fd_sock2.port.client_bind`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Start port for client socket (0 picks random port)
+
+|`jgroups.fd_sock2.port.min`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Lowest port the FD_SOCK2 server can listen on
+
+|`jgroups.fd_sock2.port.max`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Highest port the FD_SOCK2 server can listen on
+
+|`jgroups.fd_sock2.interval.suspect_msg`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Interval for broadcasting suspect messages
+
+|`jgroups.fd_sock2.timeout.connect`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Maximum time to wait for a connect attempt
+
+|`jgroups.fd_sock2.linger`
+|Gauge (Configuration)
+|`{seconds}`
+|SO_LINGER in seconds (-1 disables it)
+|===
+
+NOTE: FD_SOCK2 is the successor to FD_SOCK, using NIO-based TCP connections for failure detection. It provides improved performance and scalability. The configuration metrics help tune port ranges and connection timeouts.
+
 == Building
 
 [source,bash]

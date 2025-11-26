@@ -48,6 +48,7 @@ public class REDMetricsInstrumentation implements MetricsInstrumentation<RED> {
                 ObservableUnit.DIMENSIONLESS,
                 measurement -> {
                     double rate = protocol.getDropRate();
+                    // TODO this needs better handling
                     // Only record if the value is valid (not NaN or Infinity)
                     if (Double.isFinite(rate)) {
                         measurement.record(rate);
