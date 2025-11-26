@@ -10,11 +10,12 @@ Low-overhead OpenTelemetry metrics integration for JGroups with standardized nam
 
 This project provides a native OpenTelemetry exporter for JGroups that:
 
+* *Out-of-the-Box OpenTelemetry Protocol (OTLP) Export*: Drop-in OpenTelemetry metrics export for vanilla JGroups and Infinispan (library mode)
 * *Standardized Metric Names*: Exports JGroups metrics with curated, semantic naming conventions that follow OpenTelemetry best practices
-* *Defined Units*: All metrics include proper UCUM units (e.g., `{messages}`, `{bytes}`, `{connections}`) for consistent interpretation across observability platforms
-* *Native Integration*: Integrates directly with the OpenTelemetry SDK without requiring JMX or external metric scrapers
+* *Defined Units*: All metrics include proper UCUM units (e.g., `s`, `ms`, `By`, `{messages}`, dimensionless, etc.) for consistent interpretation across observability platforms
 * *Zero Configuration Observability API*: Automatically discovers and exports metrics from JGroups protocols in the stack
-* *Extensible SPI*: Pluggable architecture using ServiceLoader allows custom protocol instrumentations to be added without modifying core code
+* *Native Integration*: Integrates directly with the OpenTelemetry SDK without requiring JMX or external metric scrapers
+* *Extensible SPI*: Pluggable architecture using ServiceLoader allows custom protocol instrumentation to be added without modifying core code
 * *Production Ready*: Designed for high-throughput, low-overhead metric collection in production environments
 
 Unlike JMX-based monitoring, this integration provides:
@@ -40,7 +41,7 @@ The current implementation operates entirely outside JGroups core:
 
 This approach allows immediate deployment without waiting for JGroups upstream acceptance.
 
-==== Phase 2: Upstream Observability Annotations
+=== Phase 2: Upstream Observability Annotations
 
 Move the `org.jgroups.annotations.observability` package to JGroups core:
 
@@ -48,7 +49,7 @@ Move the `org.jgroups.annotations.observability` package to JGroups core:
 * No external dependencies (pure Java annotations), hi Bela :-)
 * Framework-agnostic design works with any metrics system while striving primarily for OpenTelemetry
 
-==== Phase 3: Annotate Protocol Metrics
+=== Phase 3: Annotate Protocol Metrics
 
 Internal and external protocol developers annotate observable fields and methods:
 
@@ -65,7 +66,7 @@ public class OBSERVABLE_PROTOCOL extends Protocol {
 }
 ----
 
-==== Generic Metric Discovery
+=== Generic Metric Discovery
 
 Replace protocol-specific instrumentation with a single generic processor:
 
@@ -90,10 +91,11 @@ When JGroups adopts the SPI:
 2. Use generic `ObservableMetricsInstrumentationProcessor` for all protocols
 3. Maintain backward compatibility during transition
 4. Eventually remove reflection-based instrumentation
+5. Most importantly – keep in place existing testing infrastructure as they will continue verifying metrics are still being exported.
 
 This roadmap ensures the project can deliver value immediately while building toward a more elegant, upstream-integrated solution.
 
-NOTE: This will be moved to a separate DESIGN.adoc once this becomes irrelevant.
+NOTE: This will be moved to a separate `DESIGN.adoc` once this becomes irrelevant.
 
 == Usage
 
@@ -110,110 +112,59 @@ NOTE: This will be moved to a separate DESIGN.adoc once this becomes irrelevant.
 
 === Adding to Protocol Stack
 
-Add the `OPENTELEMETRY` protocol to your JGroups configuration:
-
-[source,java]
-----
-// Configure OpenTelemetry SDK
-SdkMeterProvider meterProvider = SdkMeterProvider.builder()
-    .registerMetricReader(PeriodicMetricReader.builder(prometheusExporter)
-        .setInterval(Duration.ofSeconds(60))
-        .build())
-    .build();
-
-OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
-    .setMeterProvider(meterProvider)
-    .build();
-
-// Create OPENTELEMETRY protocol with OpenTelemetry instance
-OPENTELEMETRY otel = new OPENTELEMETRY()
-    .setOpenTelemetry(openTelemetry);
-
-// Add to protocol stack
-JChannel channel = new JChannel(
-    new UDP(),
-    new PING(),
-    new MERGE3(),
-    new FD_SOCK(),
-    new FD_ALL3(),
-    new VERIFY_SUSPECT(),
-    new NAKACK2(),
-    otel,              // OpenTelemetry protocol
-    new UNICAST3(),
-    new STABLE(),
-    new GMS(),
-    new UFC(),
-    new MFC(),
-    new FRAG2()
-).name("node1");
-
-channel.connect("my-cluster");
-----
-
-=== XML Configuration
+The simplest way to integrate is to add the protocol and let it auto-configure OpenTelemetry SDK with endpoint,
+via XML configuration with system properties:
 
 [source,xml]
 ----
 <config>
     <UDP />
     <PING />
-    <MERGE3 />
-    <FD_SOCK />
-    <FD_ALL3 />
-    <VERIFY_SUSPECT />
     <NAKACK2 />
-    <OPENTELEMETRY />
+    <OPENTELEMETRY endpoint="http://localhost:4317" export_interval="30000" />
     <UNICAST3 />
     <STABLE />
     <GMS />
-    <UFC />
-    <MFC />
-    <FRAG2 />
 </config>
 ----
 
-=== Programmatic Registration Without Protocol
-
-For use cases without adding the OPENTELEMETRY protocol to the protocol stack, you can use `MetricsRegistrar` directly:
+or programmatically:
 
 [source,java]
 ----
-import org.jgroups.opentelemetry.impl.MetricsRegistrar;
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import org.jgroups.JChannel;
+// Create OPENTELEMETRY protocol with OTLP endpoint - SDK will be auto-configured
+OPENTELEMETRY otel =
 
-// Configure OpenTelemetry SDK
-SdkMeterProvider meterProvider = SdkMeterProvider.builder()
-    .registerMetricReader(PeriodicMetricReader.builder(prometheusExporter)
-        .setInterval(Duration.ofSeconds(60))
-        .build())
-    .build();
-
-OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
-    .setMeterProvider(meterProvider)
-    .build();
-
-// Create your JChannel without OPENTELEMETRY protocol
 JChannel channel = new JChannel(
     new UDP(),
     new PING(),
     new NAKACK2(),
+    new OPENTELEMETRY()
+        .setEndpoint("http://localhost:4317")     // OTLP gRPC endpoint
+        .setExportInterval(30000),                // Export every 30 seconds
     new UNICAST3(),
     new STABLE(),
     new GMS()
-).name("node1");
+).name("my-node");
 
-// Connect the channel
 channel.connect("my-cluster");
+----
+
+The protocol will automatically create and manage the OpenTelemetry SDK lifecycle.
+When the protocol is destroyed, the SDK will be properly cleaned up.
+
+=== Programmatic Registration without using `OPENTELEMETRY` protocol
+
+For use cases without adding the OPENTELEMETRY protocol to the protocol stack,
+such as for a server/container-managed JGroups stack, you can use `MetricsRegistrar` directly:
+
+[source,java]
+----
+// Create your JChannel without OPENTELEMETRY protocol
+JChannel channel = new JChannel(...);
 
 // Register metrics programmatically
-MetricsRegistrar.registerMetrics(
-    openTelemetry,
-    channel.getProtocolStack(),
-    "org.jgroups"  // instrumentation scope name
-);
+MetricsRegistrar.registerMetrics(openTelemetryInstance, channel.getProtocolStack(), "org.jgroups");
 ----
 
 == Protocol Configuration
@@ -233,6 +184,16 @@ The `OPENTELEMETRY` protocol supports the following configuration properties:
 |boolean
 |`true`
 |Whether to expose protocol configuration values as metrics (e.g., thresholds, enabled flags, capacity limits). Configuration metrics provide important context for understanding operational metrics and detecting configuration drift across cluster nodes. Can be set via system property `jgroups.opentelemetry.expose_configuration_metrics` or environment variable `JGROUPS_OPENTELEMETRY_EXPOSE_CONFIGURATION_METRICS`
+
+|`endpoint`
+|String
+|`null`
+|OTLP endpoint URL for metrics export (e.g., `http://localhost:4317`). If set, the protocol will automatically configure an OpenTelemetry SDK with OTLP gRPC exporter. If not set and no OpenTelemetry instance is provided programmatically, falls back to `GlobalOpenTelemetry.get()`. Can be set via system property `jgroups.opentelemetry.endpoint` or environment variable `JGROUPS_OPENTELEMETRY_ENDPOINT`
+
+|`exportInterval`
+|long
+|`60000`
+|Interval in milliseconds for periodic metric export when using auto-configured SDK. Only applies when `endpoint` is configured. Can be set via system property `jgroups.opentelemetry.export_interval` or environment variable `JGROUPS_OPENTELEMETRY_EXPORT_INTERVAL`
 |===
 
 == Exported Metrics
