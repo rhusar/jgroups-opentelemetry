@@ -1,0 +1,7 @@
+org.jgroups.annotations.observability
+org.jgroups.opentelemetry.impl
+org.jgroups.opentelemetry.impl.protocols
+org.jgroups.opentelemetry.impl.protocols.dns
+org.jgroups.opentelemetry.impl.util
+org.jgroups.opentelemetry.spi
+org.jgroups.protocols.opentelemetry
