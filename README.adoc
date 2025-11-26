@@ -237,94 +237,23 @@ The `OPENTELEMETRY` protocol supports the following configuration properties:
 
 == Exported Metrics
 
-=== UNICAST3 Protocol Metrics
+=== Discovery Protocol Metrics (Common)
+
+Applies to: PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PING, and all FILE_PING-based protocols listed above
 
 [cols="3,1,1,5"]
 |===
 |Metric Name |Type |Unit |Description
 
-|`jgroups.unicast3.messages.sent`
-|Counter
-|`{messages}`
-|Total number of unicast messages sent. Throughput indicator for outgoing traffic
-
-|`jgroups.unicast3.messages.received`
-|Counter
-|`{messages}`
-|Total number of unicast messages received. Throughput indicator for incoming traffic
-
-|`jgroups.unicast3.retransmissions`
-|Counter
-|`{messages}`
-|Number of messages retransmitted. *Critical*: High values indicate network packet loss or congestion
-
-|`jgroups.unicast3.xmit_requests.sent`
-|Counter
-|`{requests}`
-|Number of retransmit requests sent to other nodes. Indicates this node detected missing messages from senders
-
-|`jgroups.unicast3.xmit_requests.received`
-|Counter
-|`{requests}`
-|Number of retransmit requests received from other nodes. Indicates other nodes are detecting packet loss from this node
-
-|`jgroups.unicast3.acks.sent`
-|Counter
-|`{acks}`
-|Number of acknowledgments sent. Protocol overhead metric
-
-|`jgroups.unicast3.acks.received`
-|Counter
-|`{acks}`
-|Number of acknowledgments received. Protocol overhead metric
-
-|`jgroups.unicast3.connections`
-|Gauge
-|`{connections}`
-|Total number of connections. Connection pool size (send + receive)
-
-|`jgroups.unicast3.connections.send`
-|Gauge
-|`{connections}`
-|Number of active outgoing send connections. Connection pool size for sends
-
-|`jgroups.unicast3.connections.receive`
-|Gauge
-|`{connections}`
-|Number of active incoming receive connections. Connection pool size for receives
-
-|`jgroups.unicast3.messages.unacked`
-|Gauge
-|`{messages}`
-|Number of unacknowledged messages in send windows. *Critical*: Indicates backpressure or slow receivers
-
-|`jgroups.unicast3.xmit_table.missing_messages`
-|Gauge
-|`{messages}`
-|Number of missing (not yet received) messages in receive windows. *Critical*: Indicates gaps in message sequence
-
-|`jgroups.unicast3.xmit_table.undelivered_messages`
-|Gauge
-|`{messages}`
-|Total undelivered messages buffered in all receive windows. Memory pressure and delivery lag indicator
-|===
-
-
-=== VERIFY_SUSPECT2 Protocol Metrics
-
-[cols="3,1,1,5"]
-|===
-|Metric Name |Type |Unit |Description
-
-|`jgroups.verify_suspect2.suspects`
-|Gauge
-|`{members}`
-|Number of currently suspected members being verified. *Critical*: Indicates members under suspicion verification
-
-|`jgroups.verify_suspect2.verification_task_running`
+|`jgroups.<protocol>.is_coord`
 |Gauge
 |`1` (dimensionless)
-|Indicates whether the verification task is currently running (1=running, 0=stopped). Task activity indicator
+|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.ping.is_coord`, `jgroups.dns_ping.is_coord`)
+
+|`jgroups.<protocol>.discovery_requests`
+|Gauge
+|`{requests}`
+|Number of discovery requests sent. Discovery activity indicator. Tracks how often this node initiates discovery to find cluster members
 |===
 
 
@@ -352,26 +281,6 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 |Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.file_ping.is_coord`, `jgroups.jdbc_ping.is_coord`)
 |===
 
-NOTE: FILE_PING-based protocols use persistent storage (file system, database, cloud storage) to share cluster membership information. The `writes` and `reads` metrics help monitor the frequency of storage operations, which can be important for troubleshooting discovery issues or optimizing storage backend performance.
-
-=== Discovery Protocol Metrics (Common)
-
-Applies to: PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PING, and all FILE_PING-based protocols listed above
-
-[cols="3,1,1,5"]
-|===
-|Metric Name |Type |Unit |Description
-
-|`jgroups.<protocol>.is_coord`
-|Gauge
-|`1` (dimensionless)
-|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.ping.is_coord`, `jgroups.dns_ping.is_coord`)
-
-|`jgroups.<protocol>.discovery_requests`
-|Gauge
-|`{requests}`
-|Number of discovery requests sent. Discovery activity indicator. Tracks how often this node initiates discovery to find cluster members
-|===
 
 === MERGE3 Protocol Metrics
 
@@ -419,6 +328,7 @@ Applies to: PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PI
 |`1` (dimensionless)
 |Maximum number of merge participants to be involved in a merge (0=unlimited)
 |===
+
 
 === FD_SOCK Protocol Metrics
 
@@ -492,7 +402,6 @@ Applies to: PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PI
 |Whether to use KEEP_ALIVE on the ping socket (1=enabled, 0=disabled)
 |===
 
-NOTE: FD_SOCK uses TCP sockets for ring-based failure detection. Each member monitors its neighbor on the right by maintaining a socket connection. Socket closure indicates failure. The configuration metrics help tune connection parameters and cache behavior.
 
 === FD_SOCK2 Protocol Metrics
 
@@ -551,7 +460,6 @@ NOTE: FD_SOCK uses TCP sockets for ring-based failure detection. Each member mon
 |SO_LINGER in seconds (-1 disables it)
 |===
 
-NOTE: FD_SOCK2 is the successor to FD_SOCK, using NIO-based TCP connections for failure detection. It provides improved performance and scalability. The configuration metrics help tune port ranges and connection timeouts.
 
 === FD_ALL3 Protocol Metrics
 
@@ -605,7 +513,6 @@ NOTE: FD_SOCK2 is the successor to FD_SOCK, using NIO-based TCP connections for 
 |Number of bits for each member (timeout / interval)
 |===
 
-NOTE: FD_ALL3 uses bitmap-based heartbeat failure detection. Every member periodically multicasts a heartbeat. Each member maintains a bitmap for all other members, with bits set to 1 on heartbeat reception and advanced to 0 on each interval. When all bits are 0, the member is suspected. The configuration metrics help tune the detection sensitivity through timeout and interval settings.
 
 === FD_ALL Protocol Metrics
 
@@ -664,7 +571,6 @@ NOTE: FD_ALL3 uses bitmap-based heartbeat failure detection. Every member period
 |Whether to use TimeService for timestamps (1=enabled, 0=disabled)
 |===
 
-NOTE: FD_ALL uses timestamp-based heartbeat failure detection. Every member periodically multicasts a heartbeat and maintains a timestamp table for all other members. When a heartbeat or data is received from a member, their timestamp is updated. The timeout checker periodically checks for expired timestamps to identify suspected members.
 
 === FD_ALL2 Protocol Metrics
 
@@ -713,125 +619,154 @@ NOTE: FD_ALL uses timestamp-based heartbeat failure detection. Every member peri
 |Interval at which a heartbeat is sent to the cluster
 |===
 
-NOTE: FD_ALL2 uses flag-based heartbeat failure detection. Every member periodically multicasts a heartbeat and maintains a boolean flag for all other members. When a heartbeat or data is received, the flag is set to true. The timeout checker periodically checks flags - if false (no heartbeat received within timeout), the member is suspected and the flag is reset to false for the next interval.
 
-=== UFC Protocol Metrics
-
-[cols="3,1,1,5"]
-|===
-|Metric Name |Type |Unit |Description
-
-|`jgroups.ufc.credit.requests.received`
-|Counter
-|`{requests}`
-|Number of credit requests received from senders
-
-|`jgroups.ufc.credit.requests.sent`
-|Counter
-|`{requests}`
-|Number of credit requests sent to receivers
-
-|`jgroups.ufc.credit.responses.received`
-|Counter
-|`{requests}`
-|Number of credit responses (replenishments) received from receivers
-
-|`jgroups.ufc.credit.responses.sent`
-|Counter
-|`{requests}`
-|Number of credit responses (replenishments) sent to senders
-
-|`jgroups.ufc.blocked`
-|Gauge
-|`1` (dimensionless)
-|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
-
-|`jgroups.ufc.blocked.avg`
-|Gauge
-|`ms` (milliseconds)
-|Average time in milliseconds that senders were blocked waiting for credits. *Critical*: High values indicate credit starvation
-
-|`jgroups.ufc.credits.max`
-|Gauge (Configuration)
-|`By` (bytes)
-|Maximum number of bytes to send per receiver before credits must be replenished
-
-|`jgroups.ufc.credits.min`
-|Gauge (Configuration)
-|`By` (bytes)
-|Threshold at which a receiver sends more credits to a sender
-
-|`jgroups.ufc.credits.threshold.min`
-|Gauge (Configuration)
-|`1` (dimensionless)
-|Threshold (as percentage of max_credits) at which a receiver sends more credits
-
-|`jgroups.ufc.blocked.max`
-|Gauge (Configuration)
-|`{milliseconds}`
-|Maximum time in milliseconds to block waiting for credits before sending a replenishment request
-|===
-
-NOTE: UFC (Unicast Flow Control) is a credit-based flow control protocol for unicast messages. Each sender has a credit budget (in bytes) per receiver. When credits are exhausted, the sender blocks until credits are replenished by the receiver. This prevents fast senders from overwhelming slow receivers with unicast traffic.
-
-=== MFC Protocol Metrics
+=== VERIFY_SUSPECT2 Protocol Metrics
 
 [cols="3,1,1,5"]
 |===
 |Metric Name |Type |Unit |Description
 
-|`jgroups.mfc.credit.requests.received`
-|Counter
-|`{requests}`
-|Number of credit requests received from senders
+|`jgroups.verify_suspect2.suspects`
+|Gauge
+|`{members}`
+|Number of currently suspected members being verified. *Critical*: Indicates members under suspicion verification
 
-|`jgroups.mfc.credit.requests.sent`
-|Counter
-|`{requests}`
-|Number of credit requests sent to receivers
-
-|`jgroups.mfc.credit.responses.received`
-|Counter
-|`{requests}`
-|Number of credit responses (replenishments) received from receivers
-
-|`jgroups.mfc.credit.responses.sent`
-|Counter
-|`{requests}`
-|Number of credit responses (replenishments) sent to senders
-
-|`jgroups.mfc.blocked`
+|`jgroups.verify_suspect2.verification_task_running`
 |Gauge
 |`1` (dimensionless)
-|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
-
-|`jgroups.mfc.blocked.avg`
-|Gauge
-|`ns` (nanoseconds)
-|Average time in nanoseconds that senders were blocked waiting for credits. *Critical*: High values indicate credit starvation
-
-|`jgroups.mfc.credits.max`
-|Gauge (Configuration)
-|`By` (bytes)
-|Maximum number of bytes to send per receiver before credits must be replenished
-
-|`jgroups.mfc.credits.min`
-|Gauge (Configuration)
-|`By` (bytes)
-|Threshold at which a receiver sends more credits to a sender
-
-|`jgroups.mfc.credits.threshold.min`
-|Gauge (Configuration)
-|`1` (dimensionless)
-|Threshold (as percentage of max_credits) at which a receiver sends more credits
-
-|`jgroups.mfc.blocked.max`
-|Gauge (Configuration)
-|`{milliseconds}`
-|Maximum time in milliseconds to block waiting for credits before sending a replenishment request
+|Indicates whether the verification task is currently running (1=running, 0=stopped). Task activity indicator
 |===
 
-NOTE: MFC (Multicast Flow Control) is a credit-based flow control protocol for multicast messages. It maintains a shared credit pool across all cluster members. When sending a multicast message, the sender decrements credits for all receivers. If any receiver's credits are exhausted, the sender blocks. This prevents fast senders from overwhelming slow receivers with multicast traffic.
+
+=== UNICAST3 Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.unicast3.messages.sent`
+|Counter
+|`{messages}`
+|Total number of unicast messages sent. Throughput indicator for outgoing traffic
+
+|`jgroups.unicast3.messages.received`
+|Counter
+|`{messages}`
+|Total number of unicast messages received. Throughput indicator for incoming traffic
+
+|`jgroups.unicast3.retransmissions`
+|Counter
+|`{messages}`
+|Number of messages retransmitted. *Critical*: High values indicate network packet loss or congestion
+
+|`jgroups.unicast3.xmit_requests.sent`
+|Counter
+|`{requests}`
+|Number of retransmit requests sent to other nodes. Indicates this node detected missing messages from senders
+
+|`jgroups.unicast3.xmit_requests.received`
+|Counter
+|`{requests}`
+|Number of retransmit requests received from other nodes. Indicates other nodes are detecting packet loss from this node
+
+|`jgroups.unicast3.acks.sent`
+|Counter
+|`{acks}`
+|Number of acknowledgments sent. Protocol overhead metric
+
+|`jgroups.unicast3.acks.received`
+|Counter
+|`{acks}`
+|Number of acknowledgments received. Protocol overhead metric
+
+|`jgroups.unicast3.connections`
+|Gauge
+|`{connections}`
+|Total number of connections. Connection pool size (send + receive)
+
+|`jgroups.unicast3.connections.send`
+|Gauge
+|`{connections}`
+|Number of active outgoing send connections. Connection pool size for sends
+
+|`jgroups.unicast3.connections.receive`
+|Gauge
+|`{connections}`
+|Number of active incoming receive connections. Connection pool size for receives
+
+|`jgroups.unicast3.messages.unacked`
+|Gauge
+|`{messages}`
+|Number of unacknowledged messages in send windows. *Critical*: Indicates backpressure or slow receivers
+
+|`jgroups.unicast3.xmit_table.missing_messages`
+|Gauge
+|`{messages}`
+|Number of missing (not yet received) messages in receive windows. *Critical*: Indicates gaps in message sequence
+
+|`jgroups.unicast3.xmit_table.undelivered_messages`
+|Gauge
+|`{messages}`
+|Total undelivered messages buffered in all receive windows. Memory pressure and delivery lag indicator
+|===
+
+
+=== STABLE Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.pbcast.stable.stable.sent`
+|Counter
+|`{messages}`
+|Number of STABLE messages sent (digest reports to coordinator).
+
+|`jgroups.pbcast.stable.stable.received`
+|Counter
+|`{messages}`
+|Number of STABLE messages received (digest reports from members).
+
+|`jgroups.pbcast.stable.stability.sent`
+|Counter
+|`{messages}`
+|Number of STABILITY messages sent (garbage collection triggers).
+
+|`jgroups.pbcast.stable.stability.received`
+|Counter
+|`{messages}`
+|Number of STABILITY messages received (garbage collection triggers).
+
+|`jgroups.pbcast.stable.bytes.received`
+|Gauge
+|`By` (bytes)
+|Total bytes accumulated from multicast messages since last STABLE message.
+
+|`jgroups.pbcast.stable.votes`
+|Gauge
+|`1` (dimensionless)
+|Number of STABLE votes received for current digest.
+
+|`jgroups.pbcast.stable.suspended`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether garbage collection is suspended (1=suspended, 0=active).
+
+|`jgroups.pbcast.stable.stable_task.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the stable task is running (1=running, 0=stopped).
+
+|`jgroups.pbcast.stable.gossip.avg`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Average interval in milliseconds between STABLE gossip messages (0 disables periodic gossip)
+
+|`jgroups.pbcast.stable.bytes.max`
+|Gauge (Configuration)
+|`By` (bytes)
+|Maximum bytes from multicast messages before triggering STABLE message (0 disables byte-based triggering)
+|===
 
 === GMS Protocol Metrics
 
@@ -905,64 +840,122 @@ NOTE: MFC (Multicast Flow Control) is a credit-based flow control protocol for m
 |Maximum number of join attempts before giving up and becoming singleton (0 means never give up)
 |===
 
-NOTE: GMS (Group Membership Service) is the core protocol responsible for maintaining cluster membership. It handles member joins, leaves, crashes (via suspicions), and network partition merges. The protocol maintains views (snapshots of cluster membership) and ensures all members have consistent view of the cluster. View changes are coordinated by the cluster coordinator (the first member in the view).
 
-=== STABLE Protocol Metrics
+=== UFC Protocol Metrics
 
 [cols="3,1,1,5"]
 |===
 |Metric Name |Type |Unit |Description
 
-|`jgroups.pbcast.stable.stable.sent`
+|`jgroups.ufc.credit.requests.received`
 |Counter
-|`{messages}`
-|Number of STABLE messages sent (digest reports to coordinator).
+|`{requests}`
+|Number of credit requests received from senders
 
-|`jgroups.pbcast.stable.stable.received`
+|`jgroups.ufc.credit.requests.sent`
 |Counter
-|`{messages}`
-|Number of STABLE messages received (digest reports from members).
+|`{requests}`
+|Number of credit requests sent to receivers
 
-|`jgroups.pbcast.stable.stability.sent`
+|`jgroups.ufc.credit.responses.received`
 |Counter
-|`{messages}`
-|Number of STABILITY messages sent (garbage collection triggers).
+|`{requests}`
+|Number of credit responses (replenishments) received from receivers
 
-|`jgroups.pbcast.stable.stability.received`
+|`jgroups.ufc.credit.responses.sent`
 |Counter
-|`{messages}`
-|Number of STABILITY messages received (garbage collection triggers).
+|`{requests}`
+|Number of credit responses (replenishments) sent to senders
 
-|`jgroups.pbcast.stable.bytes.received`
+|`jgroups.ufc.blocked`
 |Gauge
+|`1` (dimensionless)
+|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
+
+|`jgroups.ufc.blocked.avg`
+|Gauge
+|`ms` (milliseconds)
+|Average time in milliseconds that senders were blocked waiting for credits. *Critical*: High values indicate credit starvation
+
+|`jgroups.ufc.credits.max`
+|Gauge (Configuration)
 |`By` (bytes)
-|Total bytes accumulated from multicast messages since last STABLE message.
+|Maximum number of bytes to send per receiver before credits must be replenished
 
-|`jgroups.pbcast.stable.votes`
-|Gauge
+|`jgroups.ufc.credits.min`
+|Gauge (Configuration)
+|`By` (bytes)
+|Threshold at which a receiver sends more credits to a sender
+
+|`jgroups.ufc.credits.threshold.min`
+|Gauge (Configuration)
 |`1` (dimensionless)
-|Number of STABLE votes received for current digest.
+|Threshold (as percentage of max_credits) at which a receiver sends more credits
 
-|`jgroups.pbcast.stable.suspended`
-|Gauge
-|`1` (dimensionless)
-|Indicates whether garbage collection is suspended (1=suspended, 0=active).
-
-|`jgroups.pbcast.stable.stable_task.running`
-|Gauge
-|`1` (dimensionless)
-|Indicates whether the stable task is running (1=running, 0=stopped).
-
-|`jgroups.pbcast.stable.gossip.avg`
+|`jgroups.ufc.blocked.max`
 |Gauge (Configuration)
 |`{milliseconds}`
-|Average interval in milliseconds between STABLE gossip messages (0 disables periodic gossip)
+|Maximum time in milliseconds to block waiting for credits before sending a replenishment request
+|===
 
-|`jgroups.pbcast.stable.bytes.max`
+
+=== MFC Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.mfc.credit.requests.received`
+|Counter
+|`{requests}`
+|Number of credit requests received from senders
+
+|`jgroups.mfc.credit.requests.sent`
+|Counter
+|`{requests}`
+|Number of credit requests sent to receivers
+
+|`jgroups.mfc.credit.responses.received`
+|Counter
+|`{requests}`
+|Number of credit responses (replenishments) received from receivers
+
+|`jgroups.mfc.credit.responses.sent`
+|Counter
+|`{requests}`
+|Number of credit responses (replenishments) sent to senders
+
+|`jgroups.mfc.blocked`
+|Gauge
+|`1` (dimensionless)
+|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
+
+|`jgroups.mfc.blocked.avg`
+|Gauge
+|`ns` (nanoseconds)
+|Average time in nanoseconds that senders were blocked waiting for credits. *Critical*: High values indicate credit starvation
+
+|`jgroups.mfc.credits.max`
 |Gauge (Configuration)
 |`By` (bytes)
-|Maximum bytes from multicast messages before triggering STABLE message (0 disables byte-based triggering)
+|Maximum number of bytes to send per receiver before credits must be replenished
+
+|`jgroups.mfc.credits.min`
+|Gauge (Configuration)
+|`By` (bytes)
+|Threshold at which a receiver sends more credits to a sender
+
+|`jgroups.mfc.credits.threshold.min`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Threshold (as percentage of max_credits) at which a receiver sends more credits
+
+|`jgroups.mfc.blocked.max`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Maximum time in milliseconds to block waiting for credits before sending a replenishment request
 |===
+
 
 == Building
 
