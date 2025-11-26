@@ -833,6 +833,80 @@ NOTE: UFC (Unicast Flow Control) is a credit-based flow control protocol for uni
 
 NOTE: MFC (Multicast Flow Control) is a credit-based flow control protocol for multicast messages. It maintains a shared credit pool across all cluster members. When sending a multicast message, the sender decrements credits for all receivers. If any receiver's credits are exhausted, the sender blocks. This prevents fast senders from overwhelming slow receivers with multicast traffic.
 
+=== GMS Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.pbcast.gms.views`
+|Gauge
+|`1` (dimensionless)
+|Total number of views installed in this member. View installation tracking indicator
+
+|`jgroups.pbcast.gms.is_coord`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator
+
+|`jgroups.pbcast.gms.is_leaving`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether this member is in the process of leaving (1=leaving, 0=not leaving). Member departure indicator
+
+|`jgroups.pbcast.gms.merge.in_progress`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether a merge is currently in progress (1=merging, 0=not merging). *Critical*: Merge activity indicator
+
+|`jgroups.pbcast.gms.merge.task.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the merge task is currently running (1=running, 0=stopped). Merge task activity indicator
+
+|`jgroups.pbcast.gms.merge.killer.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the merge killer task is currently running (1=running, 0=stopped). Merge timeout task activity indicator
+
+|`jgroups.pbcast.gms.view_handler.queue`
+|Gauge
+|`1` (dimensionless)
+|Number of queued view change requests (JOIN/LEAVE/SUSPECT) waiting to be processed. *Critical*: High values indicate processing backlog
+
+|`jgroups.pbcast.gms.view_handler.suspended`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the view handler is suspended (1=suspended, 0=active). Handler activity indicator
+
+|`jgroups.pbcast.gms.timeout.join`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Timeout in milliseconds for join operations
+
+|`jgroups.pbcast.gms.timeout.leave`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Timeout in milliseconds for leave operations
+
+|`jgroups.pbcast.gms.timeout.merge`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Timeout in milliseconds to complete merge operations
+
+|`jgroups.pbcast.gms.timeout.view_ack_collection`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Timeout in milliseconds to wait for all VIEW acks (0 means wait forever)
+
+|`jgroups.pbcast.gms.join_attempts.max`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Maximum number of join attempts before giving up and becoming singleton (0 means never give up)
+|===
+
+NOTE: GMS (Group Membership Service) is the core protocol responsible for maintaining cluster membership. It handles member joins, leaves, crashes (via suspicions), and network partition merges. The protocol maintains views (snapshots of cluster membership) and ensures all members have consistent view of the cluster. View changes are coordinated by the cluster coordinator (the first member in the view).
+
 == Building
 
 [source,bash]
