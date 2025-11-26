@@ -1,7 +1,12 @@
 package org.jgroups.opentelemetry.impl.protocols;
 
+import org.jgroups.JChannel;
 import org.jgroups.opentelemetry.impl.AbstractMetricsInstrumentationTestCase;
-import org.jgroups.protocols.LOCAL_PING;
+import org.jgroups.protocols.*;
+import org.jgroups.protocols.opentelemetry.OPENTELEMETRY;
+import org.jgroups.protocols.pbcast.GMS;
+import org.jgroups.protocols.pbcast.NAKACK2;
+import org.jgroups.protocols.pbcast.STABLE;
 import org.jgroups.stack.Protocol;
 
 import java.util.List;
@@ -20,7 +25,29 @@ class LOCAL_PINGMetricsInstrumentationTestCase extends AbstractMetricsInstrument
 
     @Override
     protected List<String> getExpectedMetrics() {
-        // LOCAL_PING extends Discovery, so it should expose Discovery metrics
-        return List.of("jgroups.local_ping.is_coord", "jgroups.local_ping.discovery_requests");
+        return List.of(
+            // Discovery metrics
+            "jgroups.local_ping.is_coord",
+            "jgroups.local_ping.discovery_requests"
+        );
+    }
+
+    /**
+     * LOCAL_PING requires a transport and GMS.
+     */
+    @Override
+    protected JChannel createChannel(OPENTELEMETRY otelProtocol) throws Exception {
+        Protocol protocolUnderTest = createProtocolInstance();
+
+        return new JChannel(
+            new SHARED_LOOPBACK(),
+            protocolUnderTest,           // LOCAL_PING
+            new NAKACK2(),
+            otelProtocol,
+            new UNICAST3(),
+            new STABLE(),
+            new GMS(),
+            new FRAG2()
+        );
     }
 }

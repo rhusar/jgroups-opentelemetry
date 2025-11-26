@@ -8,38 +8,41 @@ import org.jgroups.protocols.pbcast.GMS;
 import org.jgroups.protocols.pbcast.NAKACK2;
 import org.jgroups.protocols.pbcast.STABLE;
 import org.jgroups.stack.Protocol;
-import org.junit.jupiter.api.Disabled;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
- * Test case for {@link TCPGOSSIPMetricsInstrumentation}.
+ * Test case for {@link FD_ALLMetricsInstrumentation}.
  *
  * @author Radoslav Husar
  */
-@Disabled("Requires GossipRouter service")
-class TCPGOSSIPMetricsInstrumentationTestCase extends AbstractMetricsInstrumentationTestCase {
+class FD_ALLMetricsInstrumentationTestCase extends AbstractMetricsInstrumentationTestCase {
 
     @Override
     protected Protocol createProtocolInstance() {
-        // Provide minimal required configuration for testing
-        // Set a dummy GossipRouter address (won't be used in SHARED_LOOPBACK)
-        return new TCPGOSSIP()
-            .setInitialHosts(List.of(new InetSocketAddress("localhost", 12001)));
+        return new FD_ALL();
     }
 
     @Override
     protected List<String> getExpectedMetrics() {
         return List.of(
-            // Discovery metrics
-            "jgroups.tcpgossip.is_coord",
-            "jgroups.tcpgossip.discovery_requests"
+            // Runtime metrics
+            "jgroups.fd_all.heartbeats.sent",
+            "jgroups.fd_all.heartbeats.received",
+            "jgroups.fd_all.suspect_events",
+            "jgroups.fd_all.has_suspected_members",
+            "jgroups.fd_all.timeout_checker.running",
+            "jgroups.fd_all.heartbeat_sender.running",
+            // Configuration metrics
+            "jgroups.fd_all.timeout",
+            "jgroups.fd_all.interval",
+            "jgroups.fd_all.timeout_check_interval",
+            "jgroups.fd_all.use_time_service"
         );
     }
 
     /**
-     * TCPGOSSIP requires a transport and GMS.
+     * FD_ALL requires a discovery protocol and GMS.
      */
     @Override
     protected JChannel createChannel(OPENTELEMETRY otelProtocol) throws Exception {
@@ -47,7 +50,8 @@ class TCPGOSSIPMetricsInstrumentationTestCase extends AbstractMetricsInstrumenta
 
         return new JChannel(
             new SHARED_LOOPBACK(),
-            protocolUnderTest,           // TCPGOSSIP
+            new SHARED_LOOPBACK_PING(),
+            protocolUnderTest,           // FD_ALL
             new NAKACK2(),
             otelProtocol,
             new UNICAST3(),

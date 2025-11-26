@@ -553,6 +553,168 @@ NOTE: FD_SOCK uses TCP sockets for ring-based failure detection. Each member mon
 
 NOTE: FD_SOCK2 is the successor to FD_SOCK, using NIO-based TCP connections for failure detection. It provides improved performance and scalability. The configuration metrics help tune port ranges and connection timeouts.
 
+=== FD_ALL3 Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.fd_all3.heartbeats.sent`
+|Counter
+|`{messages}`
+|Number of heartbeats sent
+
+|`jgroups.fd_all3.heartbeats.received`
+|Counter
+|`{messages}`
+|Number of heartbeats received
+
+|`jgroups.fd_all3.suspect_events`
+|Counter
+|`1` (dimensionless)
+|Number of suspect events sent
+
+|`jgroups.fd_all3.has_suspected_members`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether there are currently any suspected members (1=yes, 0=no)
+
+|`jgroups.fd_all3.timeout_checker.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the timeout checker task is running (1=running, 0=stopped)
+
+|`jgroups.fd_all3.heartbeat_sender.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
+
+|`jgroups.fd_all3.timeout`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Timeout after which a node is suspected if no heartbeat or data received
+
+|`jgroups.fd_all3.interval`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Interval at which a heartbeat is sent to the cluster
+
+|`jgroups.fd_all3.num_bits`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Number of bits for each member (timeout / interval)
+|===
+
+NOTE: FD_ALL3 uses bitmap-based heartbeat failure detection. Every member periodically multicasts a heartbeat. Each member maintains a bitmap for all other members, with bits set to 1 on heartbeat reception and advanced to 0 on each interval. When all bits are 0, the member is suspected. The configuration metrics help tune the detection sensitivity through timeout and interval settings.
+
+=== FD_ALL Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.fd_all.heartbeats.sent`
+|Counter
+|`{messages}`
+|Number of heartbeats sent
+
+|`jgroups.fd_all.heartbeats.received`
+|Counter
+|`{messages}`
+|Number of heartbeats received
+
+|`jgroups.fd_all.suspect_events`
+|Counter
+|`1` (dimensionless)
+|Number of suspect events sent
+
+|`jgroups.fd_all.has_suspected_members`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether there are currently any suspected members (1=yes, 0=no)
+
+|`jgroups.fd_all.timeout_checker.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the timeout checker task is running (1=running, 0=stopped)
+
+|`jgroups.fd_all.heartbeat_sender.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
+
+|`jgroups.fd_all.timeout`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Timeout after which a node is suspected if no heartbeat or data received
+
+|`jgroups.fd_all.interval`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Interval at which a heartbeat is sent to the cluster
+
+|`jgroups.fd_all.timeout_check_interval`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Interval at which the heartbeat timeouts are checked
+
+|`jgroups.fd_all.use_time_service`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Whether to use TimeService for timestamps (1=enabled, 0=disabled)
+|===
+
+NOTE: FD_ALL uses timestamp-based heartbeat failure detection. Every member periodically multicasts a heartbeat and maintains a timestamp table for all other members. When a heartbeat or data is received from a member, their timestamp is updated. The timeout checker periodically checks for expired timestamps to identify suspected members.
+
+=== FD_ALL2 Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.fd_all2.heartbeats.sent`
+|Counter
+|`{messages}`
+|Number of heartbeats sent
+
+|`jgroups.fd_all2.heartbeats.received`
+|Counter
+|`{messages}`
+|Number of heartbeats received
+
+|`jgroups.fd_all2.suspect_events`
+|Counter
+|`1` (dimensionless)
+|Number of suspect events sent
+
+|`jgroups.fd_all2.has_suspected_members`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether there are currently any suspected members (1=yes, 0=no)
+
+|`jgroups.fd_all2.timeout_checker.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the timeout checker task is running (1=running, 0=stopped)
+
+|`jgroups.fd_all2.heartbeat_sender.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
+
+|`jgroups.fd_all2.timeout`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Timeout after which a node is suspected if no heartbeat or data received
+
+|`jgroups.fd_all2.interval`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Interval at which a heartbeat is sent to the cluster
+|===
+
+NOTE: FD_ALL2 uses flag-based heartbeat failure detection. Every member periodically multicasts a heartbeat and maintains a boolean flag for all other members. When a heartbeat or data is received, the flag is set to true. The timeout checker periodically checks flags - if false (no heartbeat received within timeout), the member is suspected and the flag is reset to false for the next interval.
+
 == Building
 
 [source,bash]
