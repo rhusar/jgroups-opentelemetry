@@ -57,7 +57,7 @@ Internal and external protocol developers annotate observable fields and methods
 ----
 public class OBSERVABLE_PROTOCOL extends Protocol {
     @Observable(
-        name = "messages.sent",
+        name = "messages.sent", // "jgroups.observable_protocol." is prefixed automatically
         type = ObservableType.COUNTER,
         unit = ObservableUnit.MESSAGES,
         description = "Total number of unicast messages sent"
