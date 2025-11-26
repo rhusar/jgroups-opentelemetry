@@ -228,6 +228,11 @@ The `OPENTELEMETRY` protocol supports the following configuration properties:
 |String
 |`org.jgroups`
 |Instrumentation scope name for the OpenTelemetry meter. Can be set via system property `jgroups.opentelemetry.scope_name` or environment variable `JGROUPS_OPENTELEMETRY_SCOPE_NAME`
+
+|`exposeConfigurationMetrics`
+|boolean
+|`true`
+|Whether to expose protocol configuration values as metrics (e.g., thresholds, enabled flags, capacity limits). Configuration metrics provide important context for understanding operational metrics and detecting configuration drift across cluster nodes. Can be set via system property `jgroups.opentelemetry.expose_configuration_metrics` or environment variable `JGROUPS_OPENTELEMETRY_EXPOSE_CONFIGURATION_METRICS`
 |===
 
 == Exported Metrics

@@ -70,4 +70,13 @@ public interface InstrumentationContext {
                 AttributeKey.stringKey("node"), nodeName
         );
     }
+
+    /**
+     * Indicates whether protocol configuration values should be exposed as metrics.
+     * Configuration metrics include values like thresholds, enabled flags, and other
+     * protocol settings that can change at runtime.
+     *
+     * @return true if configuration metrics should be exposed, false otherwise
+     */
+    boolean exposeConfigurationMetrics();
 }

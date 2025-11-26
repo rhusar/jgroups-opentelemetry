@@ -3,6 +3,7 @@ package org.jgroups.opentelemetry.impl;
 import io.opentelemetry.api.metrics.Meter;
 import org.jgroups.logging.Log;
 import org.jgroups.annotations.observability.Observable;
+import org.jgroups.annotations.observability.ObservableScope;
 import org.jgroups.logging.LogFactory;
 import org.jgroups.opentelemetry.spi.InstrumentationContext;
 import org.jgroups.opentelemetry.spi.MetricsInstrumentation;
@@ -49,10 +50,10 @@ public class ObservableMetricsInstrumentationProcessor implements MetricsInstrum
         int count = 0;
 
         // Process annotated fields
-        count += processFields(protocol, meter);
+        count += processFields(protocol, meter, context);
 
         // Process annotated methods
-        count += processMethods(protocol, meter);
+        count += processMethods(protocol, meter, context);
 
         if (count > 0) {
             log.debug("registered %d @Observable metrics for %s", count, protocol.getClass().getSimpleName());
@@ -62,13 +63,20 @@ public class ObservableMetricsInstrumentationProcessor implements MetricsInstrum
     /**
      * Processes fields annotated with @Observable.
      */
-    private static int processFields(Protocol protocol, Meter meter) {
+    private int processFields(Protocol protocol, Meter meter, InstrumentationContext context) {
         int count = 0;
         Class<?> clazz = protocol.getClass();
 
         for (Field field : getAllFields(clazz)) {
             Observable annotation = field.getAnnotation(Observable.class);
             if (annotation != null) {
+                // Skip configuration metrics if exposeConfigurationMetrics is false
+                if (annotation.scope() == ObservableScope.CONFIGURATION && !context.exposeConfigurationMetrics()) {
+                    log.trace("skipping configuration metric for field %s.%s (exposeConfigurationMetrics=false)",
+                             clazz.getSimpleName(), field.getName());
+                    continue;
+                }
+
                 try {
                     registerFieldMetric(protocol, meter, field, annotation);
                     count++;
@@ -85,13 +93,20 @@ public class ObservableMetricsInstrumentationProcessor implements MetricsInstrum
     /**
      * Processes methods annotated with @Observable.
      */
-    private static int processMethods(Protocol protocol, Meter meter) {
+    private int processMethods(Protocol protocol, Meter meter, InstrumentationContext context) {
         int count = 0;
         Class<?> clazz = protocol.getClass();
 
         for (Method method : clazz.getDeclaredMethods()) {
             Observable annotation = method.getAnnotation(Observable.class);
             if (annotation != null) {
+                // Skip configuration metrics if exposeConfigurationMetrics is false
+                if (annotation.scope() == ObservableScope.CONFIGURATION && !context.exposeConfigurationMetrics()) {
+                    log.trace("skipping configuration metric for method %s.%s (exposeConfigurationMetrics=false)",
+                             clazz.getSimpleName(), method.getName());
+                    continue;
+                }
+
                 try {
                     registerMethodMetric(protocol, meter, method, annotation);
                     count++;

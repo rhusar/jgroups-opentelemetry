@@ -10,5 +10,5 @@ import org.jgroups.stack.Protocol;
  *
  * @author Radoslav Husar
  */
-public record BasicInstrumentationContext(Protocol protocol, Meter meter) implements InstrumentationContext {
+public record BasicInstrumentationContext(Protocol protocol, Meter meter, boolean exposeConfigurationMetrics) implements InstrumentationContext {
 }

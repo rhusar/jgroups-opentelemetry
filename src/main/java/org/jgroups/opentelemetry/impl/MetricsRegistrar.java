@@ -32,8 +32,9 @@ public class MetricsRegistrar {
      * @param openTelemetry The OpenTelemetry instance to create the meter from
      * @param protocolStack The protocol stack containing protocols to instrument
      * @param instrumentationScopeName The instrumentation scope name for the OpenTelemetry meter
+     * @param exposeConfigurationMetrics Whether to expose protocol configuration values as metrics
      */
-    public static void registerMetrics(OpenTelemetry openTelemetry, ProtocolStack protocolStack, String instrumentationScopeName) {
+    public static void registerMetrics(OpenTelemetry openTelemetry, ProtocolStack protocolStack, String instrumentationScopeName, boolean exposeConfigurationMetrics) {
         Meter meter = openTelemetry.getMeter(instrumentationScopeName);
         List<Protocol> protocols = protocolStack.getProtocols();
         // Load all available MetricsInstrumentation providers and create a map
@@ -65,14 +66,14 @@ public class MetricsRegistrar {
                 // Use specific instrumentation if available
                 log.debug("found protocol %s, registering specific metrics instrumentation", protocol.getClass().getSimpleName());
 
-                InstrumentationContext context = new BasicInstrumentationContext(protocol, meter);
+                InstrumentationContext context = new BasicInstrumentationContext(protocol, meter, exposeConfigurationMetrics);
                 instrumentation.registerMetrics(context);
                 registeredCount++;
             } else if (genericInstrumentation != null) {
                 // Fall back to generic @Observable processor
                 log.trace("no specific instrumentation for protocol %s, using generic @Observable processor", protocol.getClass().getSimpleName());
 
-                InstrumentationContext context = new BasicInstrumentationContext(protocol, meter);
+                InstrumentationContext context = new BasicInstrumentationContext(protocol, meter, exposeConfigurationMetrics);
                 genericInstrumentation.registerMetrics(context);
                 genericCount++;
             }

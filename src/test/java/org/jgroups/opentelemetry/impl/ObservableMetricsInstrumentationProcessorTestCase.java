@@ -70,7 +70,7 @@ public class ObservableMetricsInstrumentationProcessorTestCase {
 
         // Register metrics using ObservableMetricsProcessor
         ObservableMetricsInstrumentationProcessor processor = new ObservableMetricsInstrumentationProcessor();
-        InstrumentationContext context = new BasicInstrumentationContext(testProtocol, meter);
+        InstrumentationContext context = new BasicInstrumentationContext(testProtocol, meter, true);
 
         processor.registerMetrics(context);
 
@@ -114,7 +114,7 @@ public class ObservableMetricsInstrumentationProcessorTestCase {
 
         // Register metrics for channel1's test protocol
         ObservableMetricsInstrumentationProcessor processor = new ObservableMetricsInstrumentationProcessor();
-        InstrumentationContext context = new BasicInstrumentationContext(testProtocol, meter);
+        InstrumentationContext context = new BasicInstrumentationContext(testProtocol, meter, true);
         processor.registerMetrics(context);
 
         // Record initial counts
@@ -170,7 +170,7 @@ public class ObservableMetricsInstrumentationProcessorTestCase {
 
         // Register metrics
         ObservableMetricsInstrumentationProcessor processor = new ObservableMetricsInstrumentationProcessor();
-        InstrumentationContext context = new BasicInstrumentationContext(testProtocol, meter);
+        InstrumentationContext context = new BasicInstrumentationContext(testProtocol, meter, true);
         processor.registerMetrics(context);
 
         // Force metric collection

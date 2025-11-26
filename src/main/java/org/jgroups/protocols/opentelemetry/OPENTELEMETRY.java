@@ -2,7 +2,6 @@ package org.jgroups.protocols.opentelemetry;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
-import org.jgroups.Message;
 import org.jgroups.stack.Protocol;
 import org.jgroups.annotations.MBean;
 import org.jgroups.annotations.Property;
@@ -26,6 +25,10 @@ public class OPENTELEMETRY extends Protocol {
             systemProperty = {"jgroups.opentelemetry.scope_name", "JGROUPS_OPENTELEMETRY_SCOPE_NAME"})
     protected String instrumentationScopeName = "org.jgroups";
 
+    @Property(description = "Whether to expose protocol configuration values as metrics (e.g., thresholds, enabled flags, capacity limits)",
+            systemProperty = {"jgroups.opentelemetry.expose_configuration_metrics", "JGROUPS_OPENTELEMETRY_EXPOSE_CONFIGURATION_METRICS"})
+    protected boolean exposeConfigurationMetrics = true;
+
     protected OpenTelemetry openTelemetry;
 
     public OPENTELEMETRY() {
@@ -45,6 +48,15 @@ public class OPENTELEMETRY extends Protocol {
         return this;
     }
 
+    public boolean isExposeConfigurationMetrics() {
+        return exposeConfigurationMetrics;
+    }
+
+    public OPENTELEMETRY setExposeConfigurationMetrics(boolean exposeConfigurationMetrics) {
+        this.exposeConfigurationMetrics = exposeConfigurationMetrics;
+        return this;
+    }
+
     @Override
     public void init() throws Exception {
         super.init();
@@ -53,7 +65,7 @@ public class OPENTELEMETRY extends Protocol {
             openTelemetry = GlobalOpenTelemetry.get();
         }
         if (openTelemetry != null) {
-            MetricsRegistrar.registerMetrics(openTelemetry, getProtocolStack(), instrumentationScopeName);
+            MetricsRegistrar.registerMetrics(openTelemetry, getProtocolStack(), instrumentationScopeName, exposeConfigurationMetrics);
         }
     }
 

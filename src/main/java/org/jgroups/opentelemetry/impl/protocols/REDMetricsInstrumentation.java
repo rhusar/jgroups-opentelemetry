@@ -57,19 +57,21 @@ public class REDMetricsInstrumentation implements MetricsInstrumentation<RED> {
                 });
 
         // Configuration metrics (enabled/thresholds)
-        helper.registerLongGauge("enabled",
-                "Whether RED is currently active (1=enabled, 0=disabled)",
-                ObservableUnit.DIMENSIONLESS,
-                measurement -> measurement.record(protocol.isEnabled() ? 1 : 0));
+        if (context.exposeConfigurationMetrics()) {
+            helper.registerLongGauge("enabled",
+                    "Whether RED is currently active (1=enabled, 0=disabled)",
+                    ObservableUnit.DIMENSIONLESS,
+                    measurement -> measurement.record(protocol.isEnabled() ? 1 : 0));
 
-        helper.registerLongGauge("threshold.min",
-                "Minimum threshold below which no messages are dropped",
-                ObservableUnit.MESSAGES,
-                measurement -> measurement.record(ReflectionHelper.getLongValue(protocol, "min")));
+            helper.registerLongGauge("threshold.min",
+                    "Minimum threshold below which no messages are dropped",
+                    ObservableUnit.MESSAGES,
+                    measurement -> measurement.record(ReflectionHelper.getLongValue(protocol, "min")));
 
-        helper.registerLongGauge("threshold.max",
-                "Maximum threshold above which all messages are dropped",
-                ObservableUnit.MESSAGES,
-                measurement -> measurement.record(ReflectionHelper.getLongValue(protocol, "max")));
+            helper.registerLongGauge("threshold.max",
+                    "Maximum threshold above which all messages are dropped",
+                    ObservableUnit.MESSAGES,
+                    measurement -> measurement.record(ReflectionHelper.getLongValue(protocol, "max")));
+        }
     }
 }

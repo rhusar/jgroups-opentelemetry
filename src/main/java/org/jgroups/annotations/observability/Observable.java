@@ -73,4 +73,21 @@ public @interface Observable {
      * @return The metric description
      */
     String description() default "";
+
+    /**
+     * The scope of this metric, indicating whether it's runtime operational data or configuration.
+     *
+     * <p>{@link ObservableScope#RUNTIME} metrics are always exported and represent dynamic protocol
+     * behavior (e.g., message counts, queue sizes, active connections).</p>
+     *
+     * <p>{@link ObservableScope#CONFIGURATION} metrics are only exported when the
+     * {@code exposeConfigurationMetrics} option is enabled on the OPENTELEMETRY protocol.
+     * These represent protocol settings and thresholds (e.g., min/max bounds, capacity limits,
+     * enabled/disabled flags).</p>
+     *
+     * <p>Default is {@link ObservableScope#RUNTIME}.</p>
+     *
+     * @return The metric scope
+     */
+    ObservableScope scope() default ObservableScope.RUNTIME;
 }
