@@ -907,6 +907,63 @@ NOTE: MFC (Multicast Flow Control) is a credit-based flow control protocol for m
 
 NOTE: GMS (Group Membership Service) is the core protocol responsible for maintaining cluster membership. It handles member joins, leaves, crashes (via suspicions), and network partition merges. The protocol maintains views (snapshots of cluster membership) and ensures all members have consistent view of the cluster. View changes are coordinated by the cluster coordinator (the first member in the view).
 
+=== STABLE Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.pbcast.stable.stable.sent`
+|Counter
+|`{messages}`
+|Number of STABLE messages sent (digest reports to coordinator).
+
+|`jgroups.pbcast.stable.stable.received`
+|Counter
+|`{messages}`
+|Number of STABLE messages received (digest reports from members).
+
+|`jgroups.pbcast.stable.stability.sent`
+|Counter
+|`{messages}`
+|Number of STABILITY messages sent (garbage collection triggers).
+
+|`jgroups.pbcast.stable.stability.received`
+|Counter
+|`{messages}`
+|Number of STABILITY messages received (garbage collection triggers).
+
+|`jgroups.pbcast.stable.bytes.received`
+|Gauge
+|`By` (bytes)
+|Total bytes accumulated from multicast messages since last STABLE message.
+
+|`jgroups.pbcast.stable.votes`
+|Gauge
+|`1` (dimensionless)
+|Number of STABLE votes received for current digest.
+
+|`jgroups.pbcast.stable.suspended`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether garbage collection is suspended (1=suspended, 0=active).
+
+|`jgroups.pbcast.stable.stable_task.running`
+|Gauge
+|`1` (dimensionless)
+|Indicates whether the stable task is running (1=running, 0=stopped).
+
+|`jgroups.pbcast.stable.gossip.avg`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Average interval in milliseconds between STABLE gossip messages (0 disables periodic gossip)
+
+|`jgroups.pbcast.stable.bytes.max`
+|Gauge (Configuration)
+|`By` (bytes)
+|Maximum bytes from multicast messages before triggering STABLE message (0 disables byte-based triggering)
+|===
+
 == Building
 
 [source,bash]

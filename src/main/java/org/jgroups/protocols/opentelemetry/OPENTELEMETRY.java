@@ -2,6 +2,7 @@ package org.jgroups.protocols.opentelemetry;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import org.jgroups.opentelemetry.spi.MetricsInstrumentation;
 import org.jgroups.stack.Protocol;
 import org.jgroups.annotations.MBean;
 import org.jgroups.annotations.Property;
