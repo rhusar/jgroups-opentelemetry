@@ -715,6 +715,124 @@ NOTE: FD_ALL uses timestamp-based heartbeat failure detection. Every member peri
 
 NOTE: FD_ALL2 uses flag-based heartbeat failure detection. Every member periodically multicasts a heartbeat and maintains a boolean flag for all other members. When a heartbeat or data is received, the flag is set to true. The timeout checker periodically checks flags - if false (no heartbeat received within timeout), the member is suspected and the flag is reset to false for the next interval.
 
+=== UFC Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.ufc.credit.requests.received`
+|Counter
+|`{requests}`
+|Number of credit requests received from senders
+
+|`jgroups.ufc.credit.requests.sent`
+|Counter
+|`{requests}`
+|Number of credit requests sent to receivers
+
+|`jgroups.ufc.credit.responses.received`
+|Counter
+|`{requests}`
+|Number of credit responses (replenishments) received from receivers
+
+|`jgroups.ufc.credit.responses.sent`
+|Counter
+|`{requests}`
+|Number of credit responses (replenishments) sent to senders
+
+|`jgroups.ufc.blocked`
+|Gauge
+|`1` (dimensionless)
+|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
+
+|`jgroups.ufc.blocked.avg`
+|Gauge
+|`ms` (milliseconds)
+|Average time in milliseconds that senders were blocked waiting for credits. *Critical*: High values indicate credit starvation
+
+|`jgroups.ufc.credits.max`
+|Gauge (Configuration)
+|`By` (bytes)
+|Maximum number of bytes to send per receiver before credits must be replenished
+
+|`jgroups.ufc.credits.min`
+|Gauge (Configuration)
+|`By` (bytes)
+|Threshold at which a receiver sends more credits to a sender
+
+|`jgroups.ufc.credits.threshold.min`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Threshold (as percentage of max_credits) at which a receiver sends more credits
+
+|`jgroups.ufc.blocked.max`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Maximum time in milliseconds to block waiting for credits before sending a replenishment request
+|===
+
+NOTE: UFC (Unicast Flow Control) is a credit-based flow control protocol for unicast messages. Each sender has a credit budget (in bytes) per receiver. When credits are exhausted, the sender blocks until credits are replenished by the receiver. This prevents fast senders from overwhelming slow receivers with unicast traffic.
+
+=== MFC Protocol Metrics
+
+[cols="3,1,1,5"]
+|===
+|Metric Name |Type |Unit |Description
+
+|`jgroups.mfc.credit.requests.received`
+|Counter
+|`{requests}`
+|Number of credit requests received from senders
+
+|`jgroups.mfc.credit.requests.sent`
+|Counter
+|`{requests}`
+|Number of credit requests sent to receivers
+
+|`jgroups.mfc.credit.responses.received`
+|Counter
+|`{requests}`
+|Number of credit responses (replenishments) received from receivers
+
+|`jgroups.mfc.credit.responses.sent`
+|Counter
+|`{requests}`
+|Number of credit responses (replenishments) sent to senders
+
+|`jgroups.mfc.blocked`
+|Gauge
+|`1` (dimensionless)
+|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
+
+|`jgroups.mfc.blocked.avg`
+|Gauge
+|`ns` (nanoseconds)
+|Average time in nanoseconds that senders were blocked waiting for credits. *Critical*: High values indicate credit starvation
+
+|`jgroups.mfc.credits.max`
+|Gauge (Configuration)
+|`By` (bytes)
+|Maximum number of bytes to send per receiver before credits must be replenished
+
+|`jgroups.mfc.credits.min`
+|Gauge (Configuration)
+|`By` (bytes)
+|Threshold at which a receiver sends more credits to a sender
+
+|`jgroups.mfc.credits.threshold.min`
+|Gauge (Configuration)
+|`1` (dimensionless)
+|Threshold (as percentage of max_credits) at which a receiver sends more credits
+
+|`jgroups.mfc.blocked.max`
+|Gauge (Configuration)
+|`{milliseconds}`
+|Maximum time in milliseconds to block waiting for credits before sending a replenishment request
+|===
+
+NOTE: MFC (Multicast Flow Control) is a credit-based flow control protocol for multicast messages. It maintains a shared credit pool across all cluster members. When sending a multicast message, the sender decrements credits for all receivers. If any receiver's credits are exhausted, the sender blocks. This prevents fast senders from overwhelming slow receivers with multicast traffic.
+
 == Building
 
 [source,bash]

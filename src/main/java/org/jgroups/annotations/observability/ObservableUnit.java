@@ -84,6 +84,13 @@ public enum ObservableUnit {
     MEMBERS("{members}"),
 
     /**
+     * Nanoseconds unit - for high-precision time measurements in nanoseconds.
+     * <p>UCUM representation: {@code ns}</p>
+     * <p>Use for: High-precision latency, sub-millisecond timing, performance profiling</p>
+     */
+    NANOSECONDS("ns"),
+
+    /**
      * Milliseconds unit - for time measurements in milliseconds.
      * <p>UCUM representation: {@code ms}</p>
      * <p>Use for: Latency, response times, timeouts, durations under 1 second</p>
