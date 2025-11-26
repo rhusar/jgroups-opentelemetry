@@ -1,0 +1,230 @@
+= JGroups OpenTelemetry Demo
+:toc:
+
+This demo shows how to monitor JGroups clusters using OpenTelemetry with Grafana visualization.
+
+== Architecture
+
+The demo consists of:
+
+* **OpenTelemetry Collector**: Receives OTLP metrics from JGroups applications via gRPC (port 4317)
+* **Prometheus**: Stores metrics scraped from the OpenTelemetry Collector
+* **Grafana**: Visualizes JGroups metrics with pre-built dashboards
+
+== Prerequisites
+
+* podman
+
+== Quick Start
+
+. Start the observability stack:
+
+[source,bash]
+----
+cd demo
+podman compose up
+----
+
+This starts:
+- OpenTelemetry Collector on port 4317 (OTLP gRPC)
+- Prometheus on port 9090
+- Grafana UI on port 3000
+
+IMPORTANT: Wait for all services to be ready before running the demo application. Check with `podman compose ps` - all services should show "Up" status.
+
+. Build the demo application:
+
+[source,bash]
+----
+cd ..
+mvn clean package
+----
+
+. Run the demo JGroups cluster (2 nodes):
+
+[source,bash]
+----
+# Terminal 1 - Node 1
+java -Djava.net.preferIPv4Stack=true -jar target/jgroups-opentelemetry-demo-1.0.0.Alpha1-SNAPSHOT.jar node1
+
+# Terminal 2 - Node 2
+java -Djava.net.preferIPv4Stack=true -jar target/jgroups-opentelemetry-demo-1.0.0.Alpha1-SNAPSHOT.jar node2
+----
+
+. Access Grafana:
+
+* URL: http://localhost:3000
+* Username: `admin`
+* Password: `admin`
+* Navigate to Dashboards → JGroups Metrics
+
+. Send some messages to generate metrics:
+
+The demo application will automatically send messages between nodes to generate observable metrics.
+
+== Viewing Metrics
+
+=== Grafana Dashboards
+
+The demo includes pre-configured dashboards showing:
+
+* **Cluster Health**: Member count, coordinator status, view changes
+* **Message Throughput**: Messages sent/received, retransmissions
+* **Flow Control**: Credit requests, blocked senders, backpressure indicators
+* **Failure Detection**: Heartbeats, suspect events, verification status
+* **Discovery**: Discovery requests, coordinator status
+* **Performance**: Network I/O, message latency, connection counts
+
+=== Prometheus Query Examples
+
+Access Prometheus at http://localhost:9090 and try these queries:
+
+[source,promql]
+----
+# Message send rate across all nodes
+rate(jgroups_unicast3_messages_sent[1m])
+
+# Retransmission rate (network quality indicator)
+rate(jgroups_unicast3_retransmissions[1m])
+
+# Number of cluster members
+jgroups_pbcast_gms_views
+
+# Flow control backpressure
+jgroups_ufc_blocked
+
+# Failure detection heartbeats
+rate(jgroups_fd_all3_heartbeats_sent[1m])
+----
+
+=== Raw OTLP Endpoint
+
+The OpenTelemetry Collector exposes metrics in Prometheus format at:
+http://localhost:8889/metrics
+
+== Data Storage
+
+The demo uses Podman-managed volumes to persist data:
+
+* `prometheus-data` - Prometheus time-series database (metrics history)
+* `grafana-data` - Grafana dashboards and settings
+
+These volumes are managed by Podman and persist across container restarts.
+
+To inspect volumes:
+[source,bash]
+----
+podman volume ls
+podman volume inspect demo_prometheus-data
+podman volume inspect demo_grafana-data
+----
+
+To remove all data and start fresh:
+[source,bash]
+----
+podman compose down -v
+----
+
+NOTE: The `-v` flag removes volumes. Without it, your metrics history and Grafana settings are preserved across restarts.
+
+== Configuration Files
+
+=== compose.yaml
+
+Defines the observability stack with OpenTelemetry Collector, Prometheus, and Grafana.
+
+=== otel-collector.yaml
+
+Configures the OpenTelemetry Collector to:
+
+* Receive OTLP metrics via gRPC (port 4317)
+* Export metrics to Prometheus
+* Expose metrics for Prometheus scraping (port 8889)
+
+=== prometheus.yml
+
+Configures Prometheus to scrape metrics from the OpenTelemetry Collector.
+
+=== grafana-datasource.yml
+
+Configures Grafana to use Prometheus as a data source.
+
+== Stopping the Demo
+
+[source,bash]
+----
+# Stop the demo applications (Ctrl+C in each terminal)
+
+# Stop the observability stack
+podman compose down
+
+# To remove volumes as well
+podman compose down -v
+----
+
+== Troubleshooting
+
+=== No metrics appearing in Grafana
+
+. Check OpenTelemetry Collector logs:
++
+[source,bash]
+----
+podman compose logs otel-collector
+----
+
+. Verify the demo application is sending metrics:
++
+[source,bash]
+----
+# Should see "Creating OpenTelemetry SDK with OTLP endpoint" in application logs
+----
+
+. Check Prometheus targets:
++
+Navigate to http://localhost:9090/targets and verify the `otel-collector` target is UP.
+
+=== Connection refused to OTLP endpoint
+
+Error: `Failed to connect to localhost/127.0.0.1:4317`
+
+This means the OpenTelemetry Collector is not running or not ready yet.
+
+. Ensure all services are running:
++
+[source,bash]
+----
+podman compose ps
+----
++
+All services should show "Up" status.
+
+. If services are not running, start them:
++
+[source,bash]
+----
+podman compose up -d
+----
+
+. Check if port 4317 is listening:
++
+[source,bash]
+----
+ss -tlnp | grep 4317
+----
++
+You should see the OpenTelemetry Collector listening on port 4317.
+
+. View OpenTelemetry Collector logs to check for startup errors:
++
+[source,bash]
+----
+podman compose logs otel-collector
+----
+
+== Next Steps
+
+* Modify `demo/src/main/resources/jgroups.xml` to experiment with different protocol configurations
+* Add more nodes to observe cluster scaling behavior
+* Simulate network issues to see failure detection in action
+* Create custom Grafana dashboards for your specific monitoring needs

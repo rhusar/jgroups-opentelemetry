@@ -1,0 +1,44 @@
+receivers:
+  # OTLP receiver for metrics from JGroups applications
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Batch metrics for better performance
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+  # Add resource attributes if needed
+  resource:
+    attributes:
+      - key: service.name
+        value: jgroups-cluster
+        action: upsert
+
+exporters:
+  # Export metrics in Prometheus format
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: jgroups
+    const_labels:
+      environment: demo
+
+  # Debug exporter for debugging
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [prometheus, debug]
+
+  telemetry:
+    logs:
+      level: info

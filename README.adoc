@@ -97,6 +97,12 @@ This roadmap ensures the project can deliver value immediately while building to
 
 NOTE: This will be moved to a separate `DESIGN.adoc` once this becomes irrelevant.
 
+== Quick Start Demo
+
+The fastest way to see JGroups OpenTelemetry in action is to run the included demo with Grafana visualization.
+
+See **link:demo/README.adoc[demo/README.adoc]** for complete instructions on running the demo with OpenTelemetry Collector, Prometheus, and Grafana.
+
 == Usage
 
 === Maven Dependency
