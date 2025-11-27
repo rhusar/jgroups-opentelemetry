@@ -70,6 +70,7 @@ The demo includes pre-configured dashboards showing:
 
 * **Cluster Health**: Member count, coordinator status, view changes
 * **Message Throughput**: Messages sent/received, retransmissions
+* **Message Size Distribution**: Histogram of sent/received message sizes (OpenTelemetry-native replacement for SIZE/SIZE2 protocols)
 * **Flow Control**: Credit requests, blocked senders, backpressure indicators
 * **Failure Detection**: Heartbeats, suspect events, verification status
 * **Discovery**: Discovery requests, coordinator status
@@ -86,6 +87,9 @@ rate(jgroups_unicast3_messages_sent[1m])
 
 # Retransmission rate (network quality indicator)
 rate(jgroups_unicast3_retransmissions[1m])
+
+# Message size distribution - 95th percentile
+histogram_quantile(0.95, rate(jgroups_opentelemetry_message_size_sent_bucket[5m]))
 
 # Number of cluster members
 jgroups_pbcast_gms_views

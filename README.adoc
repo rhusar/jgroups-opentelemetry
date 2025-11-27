@@ -200,7 +200,19 @@ The `OPENTELEMETRY` protocol supports the following configuration properties:
 |long
 |`60000`
 |Interval in milliseconds for periodic metric export when using auto-configured SDK. Only applies when `endpoint` is configured. Can be set via system property `jgroups.opentelemetry.export_interval` or environment variable `JGROUPS_OPENTELEMETRY_EXPORT_INTERVAL`
+
+|`enableMessageSizeHistogram`
+|boolean
+|`false`
+|Enable message size histogram tracking (OpenTelemetry-native replacement for SIZE/SIZE2 protocols). Records distribution of sent and received message sizes for performance analysis. *Disabled by default* due to performance overhead on high-throughput systems. Can be set via system property `jgroups.opentelemetry.enable_message_size_histogram` or environment variable `JGROUPS_OPENTELEMETRY_ENABLE_MESSAGE_SIZE_HISTOGRAM`
+
+|`useTotalSize`
+|boolean
+|`false`
+|When true, use `Message.size()` for histogram (includes headers), otherwise use `Message.getLength()` (payload only). Only relevant when `enableMessageSizeHistogram` is true
 |===
+
+NOTE: The message size histogram feature is an OpenTelemetry-native replacement for the SIZE/SIZE2 protocols. It uses native OpenTelemetry histograms with automatic bucket selection, making the data directly compatible with modern observability platforms without manual bucket configuration.
 
 == Exported Metrics
 

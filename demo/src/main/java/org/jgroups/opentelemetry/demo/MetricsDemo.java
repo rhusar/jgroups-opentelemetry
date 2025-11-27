@@ -42,7 +42,8 @@ public class MetricsDemo implements Receiver {
                 .setEndpoint("http://localhost:4317")
                 .setExportInterval(10000)  // Export every 10 seconds
                 .setInstrumentationScopeName("org.jgroups.demo")
-                .setExposeConfigurationMetrics(true),
+                .setExposeConfigurationMetrics(true)
+                .setEnableMessageSizeHistogram(true),  // Track message size distribution
             new UNICAST3(),
             new STABLE(),
             new GMS(),

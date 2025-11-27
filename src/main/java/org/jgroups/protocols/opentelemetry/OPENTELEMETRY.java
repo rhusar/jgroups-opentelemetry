@@ -2,18 +2,23 @@ package org.jgroups.protocols.opentelemetry;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.metrics.LongHistogram;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import org.jgroups.Message;
 import org.jgroups.annotations.MBean;
 import org.jgroups.annotations.Property;
 import org.jgroups.conf.AttributeType;
 import org.jgroups.opentelemetry.impl.MetricsRegistrar;
 import org.jgroups.opentelemetry.spi.MetricsInstrumentation;
 import org.jgroups.stack.Protocol;
+import org.jgroups.util.MessageBatch;
 
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * JGroups protocol that provides OpenTelemetry metrics integration.
@@ -50,9 +55,21 @@ public class OPENTELEMETRY extends Protocol {
             systemProperty = {"jgroups.opentelemetry.export_interval", "JGROUPS_OPENTELEMETRY_EXPORT_INTERVAL"})
     protected long exportInterval = 60000; // 60 seconds default
 
+    @Property(description = "Enable message size histogram tracking (OpenTelemetry-native replacement for SIZE/SIZE2 protocols). " +
+            "Records distribution of sent and received message sizes for performance analysis. Disabled by default due to performance overhead.",
+            systemProperty = {"jgroups.opentelemetry.enable_message_size_histogram", "JGROUPS_OPENTELEMETRY_ENABLE_MESSAGE_SIZE_HISTOGRAM"})
+    protected boolean enableMessageSizeHistogram = false;
+
+    @Property(description = "When true, use Message.size() for histogram, otherwise Message.getLength()")
+    protected boolean useTotalSize = false;
+
     protected OpenTelemetry openTelemetry;
     protected SdkMeterProvider meterProvider;
     protected boolean sdkCreatedByProtocol = false;
+
+    // Message size histograms
+    protected LongHistogram messageSizeSent;
+    protected LongHistogram messageSizeReceived;
 
     public OPENTELEMETRY() {
     }
@@ -98,6 +115,24 @@ public class OPENTELEMETRY extends Protocol {
         return this;
     }
 
+    public boolean isEnableMessageSizeHistogram() {
+        return enableMessageSizeHistogram;
+    }
+
+    public OPENTELEMETRY setEnableMessageSizeHistogram(boolean enableMessageSizeHistogram) {
+        this.enableMessageSizeHistogram = enableMessageSizeHistogram;
+        return this;
+    }
+
+    public boolean isUseTotalSize() {
+        return useTotalSize;
+    }
+
+    public OPENTELEMETRY setUseTotalSize(boolean useTotalSize) {
+        this.useTotalSize = useTotalSize;
+        return this;
+    }
+
     @Override
     public void init() throws Exception {
         super.init();
@@ -115,6 +150,24 @@ public class OPENTELEMETRY extends Protocol {
 
         if (openTelemetry != null) {
             MetricsRegistrar.registerMetrics(openTelemetry, getProtocolStack(), instrumentationScopeName, exposeConfigurationMetrics);
+
+            // Initialize message size histograms if enabled
+            if (enableMessageSizeHistogram) {
+                Meter meter = openTelemetry.getMeter(instrumentationScopeName);
+                messageSizeSent = meter.histogramBuilder("jgroups.opentelemetry.message.size.sent")
+                    .setDescription("Distribution of sent message sizes")
+                    .setUnit("By")
+                    .ofLongs()
+                    .build();
+
+                messageSizeReceived = meter.histogramBuilder("jgroups.opentelemetry.message.size.received")
+                    .setDescription("Distribution of received message sizes")
+                    .setUnit("By")
+                    .ofLongs()
+                    .build();
+
+                log.info("Message size histogram tracking enabled (useTotalSize=%b)", useTotalSize);
+            }
         }
     }
 
@@ -128,6 +181,45 @@ public class OPENTELEMETRY extends Protocol {
             openTelemetry = null;
             sdkCreatedByProtocol = false;
         }
+    }
+
+    @Override
+    public Object down(Message msg) {
+        if (enableMessageSizeHistogram && messageSizeSent != null) {
+            recordMessageSize(msg, messageSizeSent);
+        }
+        return down_prot.down(msg);
+    }
+
+    @Override
+    public CompletableFuture<Object> down(Message msg, boolean async) {
+        if (enableMessageSizeHistogram && messageSizeSent != null) {
+            recordMessageSize(msg, messageSizeSent);
+        }
+        return down_prot.down(msg, async);
+    }
+
+    @Override
+    public Object up(Message msg) {
+        if (enableMessageSizeHistogram && messageSizeReceived != null) {
+            recordMessageSize(msg, messageSizeReceived);
+        }
+        return up_prot.up(msg);
+    }
+
+    @Override
+    public void up(MessageBatch batch) {
+        if (enableMessageSizeHistogram && messageSizeReceived != null) {
+            for (Message msg : batch) {
+                recordMessageSize(msg, messageSizeReceived);
+            }
+        }
+        up_prot.up(batch);
+    }
+
+    protected void recordMessageSize(Message msg, LongHistogram histogram) {
+        long size = useTotalSize ? msg.size() : msg.getLength();
+        histogram.record(size);
     }
 
     /**

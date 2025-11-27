@@ -3,6 +3,8 @@ package org.jgroups.protocols.opentelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
+import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import org.jgroups.JChannel;
 import org.jgroups.ObjectMessage;
@@ -32,11 +34,12 @@ class OPENTELEMETRYTestCase {
 
     private List<JChannel> channels;
     private OpenTelemetry openTelemetry;
+    private TestMetricExporter metricExporter;
 
     @BeforeEach
     void setUp() {
         channels = new ArrayList<>();
-        TestMetricExporter metricExporter = new TestMetricExporter();
+        metricExporter = new TestMetricExporter();
 
         // Set up OpenTelemetry with a test metric exporter
         SdkMeterProvider meterProvider = SdkMeterProvider.builder()
@@ -127,12 +130,97 @@ class OPENTELEMETRYTestCase {
         assertTrue(channel3.isConnected());
     }
 
+    @Test
+    void testMessageSizeHistogram() throws Exception {
+        // Create channels with histogram enabled
+        JChannel channel1 = createChannelWithHistogram("Node1");
+        JChannel channel2 = createChannelWithHistogram("Node2");
+
+        channels.add(channel1);
+        channels.add(channel2);
+
+        channel1.connect("histogram-cluster");
+        channel2.connect("histogram-cluster");
+
+        // Wait for cluster to form
+        Util.waitUntilAllChannelsHaveSameView(10000, 500, channel1, channel2);
+
+        // Send messages of varying sizes
+        channel1.send(new ObjectMessage(null, "Short"));  // Small message
+        channel1.send(new ObjectMessage(null, new byte[100]));  // 100 bytes
+        channel1.send(new ObjectMessage(null, new byte[1000]));  // 1KB
+        channel2.send(new ObjectMessage(null, new byte[500]));  // 500 bytes
+
+        // Allow metrics to be collected and exported
+        Thread.sleep(500);
+
+        // Get the metrics - flatten all export collections
+        Collection<MetricData> metrics = metricExporter.getExports().stream()
+            .flatMap(Collection::stream)
+            .toList();
+
+        // Find the histogram metrics
+        MetricData sentHistogram = metrics.stream()
+            .filter(m -> m.getName().equals("jgroups.opentelemetry.message.size.sent"))
+            .findFirst()
+            .orElse(null);
+
+        MetricData receivedHistogram = metrics.stream()
+            .filter(m -> m.getName().equals("jgroups.opentelemetry.message.size.received"))
+            .findFirst()
+            .orElse(null);
+
+        // Verify histograms exist
+        assertNotNull(sentHistogram, "Sent message size histogram should exist");
+        assertNotNull(receivedHistogram, "Received message size histogram should exist");
+
+        // Verify histogram has recorded samples
+        HistogramPointData sentData = sentHistogram.getHistogramData().getPoints().iterator().next();
+        HistogramPointData receivedData = receivedHistogram.getHistogramData().getPoints().iterator().next();
+
+        // Both nodes sent messages, so count should be > 0
+        assertTrue(sentData.getCount() > 0, "Sent histogram should have samples");
+        assertTrue(receivedData.getCount() > 0, "Received histogram should have samples");
+
+        // Verify the sum is reasonable (we sent messages, so total size > 0)
+        assertTrue(sentData.getSum() > 0, "Sent histogram sum should be > 0");
+        assertTrue(receivedData.getSum() > 0, "Received histogram sum should be > 0");
+
+        // Verify unit is correct
+        assertEquals("By", sentHistogram.getUnit());
+        assertEquals("By", receivedHistogram.getUnit());
+
+        // Verify descriptions
+        assertEquals("Distribution of sent message sizes", sentHistogram.getDescription());
+        assertEquals("Distribution of received message sizes", receivedHistogram.getDescription());
+    }
+
     /**
      * Creates a JChannel with a protocol stack that includes OPENTELEMETRY.
      */
     private JChannel createChannel(String name) throws Exception {
         OPENTELEMETRY otel = new OPENTELEMETRY()
             .setOpenTelemetry(openTelemetry);
+
+        return new JChannel(
+            new SHARED_LOOPBACK(),
+            new SHARED_LOOPBACK_PING(),
+            new NAKACK2(),
+            otel,  // Add OpenTelemetry protocol to the stack
+            new UNICAST3(),
+            new STABLE(),
+            new GMS(),
+            new FRAG2()
+        ).name(name);
+    }
+
+    /**
+     * Creates a JChannel with OPENTELEMETRY protocol with histogram enabled.
+     */
+    private JChannel createChannelWithHistogram(String name) throws Exception {
+        OPENTELEMETRY otel = new OPENTELEMETRY()
+            .setOpenTelemetry(openTelemetry)
+            .setEnableMessageSizeHistogram(true);  // Enable histogram tracking
 
         return new JChannel(
             new SHARED_LOOPBACK(),
