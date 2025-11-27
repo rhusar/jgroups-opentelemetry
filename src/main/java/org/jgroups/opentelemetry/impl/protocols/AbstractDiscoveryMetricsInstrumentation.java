@@ -37,7 +37,7 @@ public abstract class AbstractDiscoveryMetricsInstrumentation<T extends Discover
                 ObservableUnit.DIMENSIONLESS,
                 measurement -> measurement.record(ReflectionHelper.getBooleanValue(protocol, "is_coord") ? 1 : 0));
 
-        helper.registerLongGauge("discovery_requests",
+        helper.registerLongCounter("discovery_requests",
                 "Number of discovery requests sent",
                 ObservableUnit.REQUESTS,
                 measurement -> measurement.record(protocol.getNumberOfDiscoveryRequestsSent()));
