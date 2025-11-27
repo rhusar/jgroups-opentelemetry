@@ -24,22 +24,22 @@ public class MERGE3MetricsInstrumentation implements MetricsInstrumentation<MERG
         // Runtime metrics (always exposed)
         helper.registerLongGauge("views.cached",
                 "Number of cached ViewIds from different subgroups",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getViews()));
 
         helper.registerLongCounter("merge_events",
                 "Number of times a MERGE event was sent up the stack",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumMergeEvents()));
 
         helper.registerLongGauge("view_consistency_checker.running",
                 "Indicates whether the view consistency checker task is running (1=running, 0=stopped)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isViewConsistencyCheckerRunning() ? 1 : 0));
 
         helper.registerLongGauge("info_sender.running",
                 "Indicates whether the info sender task is running (1=running, 0=stopped)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isInfoSenderRunning() ? 1 : 0));
 
         // Configuration metrics (only exposed when exposeConfigurationMetrics=true)
@@ -61,7 +61,7 @@ public class MERGE3MetricsInstrumentation implements MetricsInstrumentation<MERG
 
             helper.registerLongGauge("max_participants_in_merge",
                     "Maximum number of merge participants to be involved in a merge (0=unlimited)",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(ReflectionHelper.getIntValue(protocol, "max_participants_in_merge")));
         }
     }

@@ -34,22 +34,22 @@ public class STABLEMetricsInstrumentation implements MetricsInstrumentation<STAB
         // Runtime metrics (always exposed)
         helper.registerLongCounter("stable.sent",
                 "Number of STABLE messages sent (digest reports to coordinator)",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getStableSent()));
 
         helper.registerLongCounter("stable.received",
                 "Number of STABLE messages received (digest reports from members)",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getStableReceived()));
 
         helper.registerLongCounter("stability.sent",
                 "Number of STABILITY messages sent (garbage collection triggers)",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getStabilitySent()));
 
         helper.registerLongCounter("stability.received",
                 "Number of STABILITY messages received (garbage collection triggers)",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getStabilityReceived()));
 
         helper.registerLongGauge("bytes.received",
@@ -62,12 +62,12 @@ public class STABLEMetricsInstrumentation implements MetricsInstrumentation<STAB
 
         helper.registerLongGauge("votes",
                 "Number of STABLE votes received for current digest. When equals member count, STABILITY is sent",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumVotes()));
 
         helper.registerLongGauge("suspended",
                 "Indicates whether garbage collection is suspended (1=suspended, 0=active). Suspension indicator",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> {
                     Object value = Util.getField(suspendedField, protocol);
                     measurement.record(value != null && (Boolean) value ? 1 : 0);
@@ -75,7 +75,7 @@ public class STABLEMetricsInstrumentation implements MetricsInstrumentation<STAB
 
         helper.registerLongGauge("stable_task.running",
                 "Indicates whether the stable task is running (1=running, 0=stopped). Task activity indicator",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getStableTaskRunning() ? 1 : 0));
 
         // Configuration metrics

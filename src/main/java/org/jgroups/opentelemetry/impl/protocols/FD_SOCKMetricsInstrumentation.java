@@ -24,17 +24,17 @@ public class FD_SOCKMetricsInstrumentation implements MetricsInstrumentation<FD_
         // Runtime metrics (always exposed)
         helper.registerLongGauge("suspects",
                 "Number of currently suspected members",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumSuspectedMembers()));
 
         helper.registerLongCounter("suspect_events",
                 "Number of suspect events generated",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumSuspectEventsGenerated()));
 
         helper.registerLongGauge("monitor.running",
                 "Indicates whether the node crash detection monitor is running (1=running, 0=stopped)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isNodeCrashMonitorRunning() ? 1 : 0));
 
         // Configuration metrics (only exposed when exposeConfigurationMetrics=true)
@@ -56,7 +56,7 @@ public class FD_SOCKMetricsInstrumentation implements MetricsInstrumentation<FD_
 
             helper.registerLongGauge("cache.max_elements",
                     "Maximum number of elements in the cache until deleted elements are removed",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(protocol.getCacheMaxElements()));
 
             helper.registerLongGauge("cache.max_age",
@@ -66,27 +66,27 @@ public class FD_SOCKMetricsInstrumentation implements MetricsInstrumentation<FD_
 
             helper.registerLongGauge("num_tries",
                     "Number of attempts coordinator is solicited for socket cache until we give up",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(protocol.getNumTries()));
 
             helper.registerLongGauge("port.start",
                     "Start port for server socket (0 picks random port)",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(protocol.getStartPort()));
 
             helper.registerLongGauge("port.client_bind",
                     "Start port for client socket (0 picks random port)",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(protocol.getClientBindPort()));
 
             helper.registerLongGauge("port.range",
                     "Number of ports to probe for start_port and client_bind_port",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(ReflectionHelper.getIntValue(protocol, "port_range")));
 
             helper.registerLongGauge("keep_alive",
                     "Whether to use KEEP_ALIVE on the ping socket (1=enabled, 0=disabled)",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(ReflectionHelper.getBooleanValue(protocol, "keep_alive") ? 1 : 0));
         }
     }

@@ -12,8 +12,7 @@ package org.jgroups.annotations.observability;
  * <p><b>UCUM Notation:</b></p>
  * <ul>
  *   <li><b>Standard units</b>: Use standard UCUM codes (e.g., {@code s} for seconds, {@code By} for bytes)</li>
- *   <li><b>Custom units</b>: Enclosed in curly braces (e.g., {@code {messages}}, {@code {connections}})</li>
- *   <li><b>Dimensionless</b>: Represented as {@code 1} for ratios or percentages</li>
+ *   <li><b>Unity</b>: Represented as {@code 1} for ratios, percentages, or discrete counts</li>
  * </ul>
  *
  * <p><b>Example usage:</b></p>
@@ -21,7 +20,7 @@ package org.jgroups.annotations.observability;
  * @Observable(
  *     name = "jgroups.unicast3.messages.sent",
  *     type = ObservableType.COUNTER,
- *     unit = ObservableUnit.MESSAGES,
+ *     unit = ObservableUnit.UNITY,
  *     description = "Total unicast messages sent"
  * )
  * protected final LongAdder num_msgs_sent = new LongAdder();
@@ -34,54 +33,14 @@ package org.jgroups.annotations.observability;
 public enum ObservableUnit {
 
     /**
-     * Messages unit - for counting discrete messages exchanged in the cluster.
-     * <p>UCUM representation: {@code {messages}}</p>
-     * <p>Use for: Message counters, message queue sizes, messages in flight</p>
+     * Unity or dimensionless - for ratios, percentages, or discrete counts.
+     * <p>UCUM representation: {@code 1}</p>
+     * <p>Use for: Utilization ratios (0.0-1.0), error rates, percentages, multipliers, discrete counts
+     * (messages, connections, requests, acknowledgments, operations, members, etc.)</p>
+     * <p><b>Note:</b> For percentages, store as decimal (0.95 for 95%) and let visualization
+     * tools format appropriately. This is the standard unit for all discrete counting metrics.</p>
      */
-    MESSAGES("{messages}"),
-
-    /**
-     * Bytes unit - for measuring data size in bytes.
-     * <p>UCUM representation: {@code By}</p>
-     * <p>Use for: Message payload sizes, buffer sizes, memory usage</p>
-     * <p><b>Note:</b> UCUM uses {@code By} (capital B) for bytes to distinguish from bits ({@code b})</p>
-     */
-    BYTES("By"),
-
-    /**
-     * Connections unit - for counting network connections.
-     * <p>UCUM representation: {@code {connections}}</p>
-     * <p>Use for: Active TCP connections, connection pool sizes, peer connections</p>
-     */
-    CONNECTIONS("{connections}"),
-
-    /**
-     * Requests unit - for counting requests sent or received.
-     * <p>UCUM representation: {@code {requests}}</p>
-     * <p>Use for: Retransmit requests, RPC requests, API calls</p>
-     */
-    REQUESTS("{requests}"),
-
-    /**
-     * Acknowledgments unit - for counting protocol acknowledgments.
-     * <p>UCUM representation: {@code {acks}}</p>
-     * <p>Use for: ACK messages, confirmation responses, protocol handshakes</p>
-     */
-    ACKS("{acks}"),
-
-    /**
-     * Operations unit - for counting database or I/O operations.
-     * <p>UCUM representation: {@code {operations}}</p>
-     * <p>Use for: Database reads, writes, removes, file operations</p>
-     */
-    OPERATIONS("{operations}"),
-
-    /**
-     * Members unit - for counting cluster members.
-     * <p>UCUM representation: {@code {members}}</p>
-     * <p>Use for: Discovered members, cluster size, peer counts</p>
-     */
-    MEMBERS("{members}"),
+    UNITY("1"),
 
     /**
      * Nanoseconds unit - for high-precision time measurements in nanoseconds.
@@ -105,13 +64,26 @@ public enum ObservableUnit {
     SECONDS("s"),
 
     /**
-     * Dimensionless unit - for ratios, percentages, or pure counts without specific units.
-     * <p>UCUM representation: {@code 1}</p>
-     * <p>Use for: Utilization ratios (0.0-1.0), error rates, percentages, multipliers</p>
-     * <p><b>Note:</b> For percentages, store as decimal (0.95 for 95%) and let visualization
-     * tools format appropriately</p>
+     * Bytes unit - for measuring data size in bytes.
+     * <p>UCUM representation: {@code By}</p>
+     * <p>Use for: Message payload sizes, buffer sizes, memory usage</p>
+     * <p><b>Note:</b> UCUM uses {@code By} (capital B) for bytes to distinguish from bits ({@code b})</p>
      */
-    DIMENSIONLESS("1");
+    BYTES("By"),
+
+    /**
+     * Kilobytes unit - for measuring data size in kilobytes (1000 bytes).
+     * <p>UCUM representation: {@code kBy}</p>
+     * <p>Use for: Larger message sizes, cache sizes, throughput measurements</p>
+     */
+    KILOBYTES("kBy"),
+
+    /**
+     * Megabytes unit - for measuring data size in megabytes (1000000 bytes).
+     * <p>UCUM representation: {@code MBy}</p>
+     * <p>Use for: File sizes, memory allocations, large data transfers</p>
+     */
+    MEGABYTES("MBy");
 
     private final String ucumCode;
 

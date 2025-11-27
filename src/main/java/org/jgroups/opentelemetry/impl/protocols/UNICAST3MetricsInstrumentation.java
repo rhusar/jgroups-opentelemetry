@@ -24,57 +24,57 @@ public class UNICAST3MetricsInstrumentation implements MetricsInstrumentation<UN
         // Counter-based metrics (cumulative counts over time)
         helper.registerLongCounter("messages.sent",
                 "Total number of unicast messages sent",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_msgs_sent")));
         helper.registerLongCounter("messages.received",
                 "Total number of unicast messages received",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_msgs_received")));
         helper.registerLongCounter("retransmissions",
                 "Number of retransmitted messages (indicates network issues)",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_xmits")));
         helper.registerLongCounter("xmit_requests.sent",
                 "Number of retransmit requests sent",
-                ObservableUnit.REQUESTS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "xmit_reqs_sent")));
         helper.registerLongCounter("xmit_requests.received",
                 "Number of retransmit requests received",
-                ObservableUnit.REQUESTS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "xmit_reqs_received")));
         helper.registerLongCounter("acks.sent",
                 "Number of acknowledgments sent",
-                ObservableUnit.ACKS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_acks_sent")));
         helper.registerLongCounter("acks.received",
                 "Number of acknowledgments received",
-                ObservableUnit.ACKS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getLongAdderValue(protocol, "num_acks_received")));
 
         // Gauge metrics (current state)
         helper.registerLongGauge("connections",
                 "Total number of connections",
-                ObservableUnit.CONNECTIONS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumConnections()));
         helper.registerLongGauge("connections.send",
                 "Number of outgoing send connections",
-                ObservableUnit.CONNECTIONS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumSendConnections()));
         helper.registerLongGauge("connections.receive",
                 "Number of incoming receive connections",
-                ObservableUnit.CONNECTIONS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumReceiveConnections()));
         helper.registerLongGauge("messages.unacked",
                 "Number of unacknowledged messages (indicates backpressure)",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumUnackedMessages()));
         helper.registerLongGauge("xmit_table.missing_messages",
                 "Number of missing messages in receive windows",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getXmitTableMissingMessages()));
         helper.registerLongGauge("xmit_table.undelivered_messages",
                 "Number of undelivered messages in all receive windows",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getXmitTableUndeliveredMessages()));
     }
 }

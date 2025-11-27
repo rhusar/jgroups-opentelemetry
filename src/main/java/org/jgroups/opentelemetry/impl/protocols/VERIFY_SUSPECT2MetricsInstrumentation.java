@@ -23,12 +23,12 @@ public class VERIFY_SUSPECT2MetricsInstrumentation implements MetricsInstrumenta
 
         helper.registerLongGauge("suspects",
                 "Number of currently suspected members being verified",
-                ObservableUnit.MEMBERS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getSetSize(protocol, "suspects")));
 
         helper.registerLongGauge("verification_task_running",
                 "Indicates whether the verification task is currently running (1=running, 0=stopped)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getBooleanValue(protocol, "running") ? 1 : 0));
     }
 }

@@ -32,7 +32,7 @@
  *     @Observable(
  *         name = "messages.sent",
  *         type = ObservableType.COUNTER,
- *         unit = ObservableUnit.MESSAGES,
+ *         unit = ObservableUnit.UNITY,
  *         description = "Total number of unicast messages sent"
  *     )
  *     protected final LongAdder num_msgs_sent = new LongAdder();
@@ -40,7 +40,7 @@
  *
  *     @Observable(
  *         type = ObservableType.GAUGE,
- *         unit = ObservableUnit.CONNECTIONS,
+ *         unit = ObservableUnit.UNITY,
  *         description = "Number of active send connections"
  *     )
  *     public int getNumSendConnections() {

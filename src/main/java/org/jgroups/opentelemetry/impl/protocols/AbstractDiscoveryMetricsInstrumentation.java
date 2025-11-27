@@ -34,12 +34,12 @@ public abstract class AbstractDiscoveryMetricsInstrumentation<T extends Discover
 
         helper.registerLongGauge("is_coord",
                 "Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getBooleanValue(protocol, "is_coord") ? 1 : 0));
 
         helper.registerLongCounter("discovery_requests",
                 "Number of discovery requests sent",
-                ObservableUnit.REQUESTS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumberOfDiscoveryRequestsSent()));
     }
 }

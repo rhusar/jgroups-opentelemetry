@@ -38,12 +38,12 @@ public abstract class AbstractFilePingMetricsInstrumentation<T extends FILE_PING
 
         helper.registerLongGauge("writes",
                 "Number of times discovery information was written",
-                ObservableUnit.OPERATIONS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getIntValue(protocol, "writes")));
 
         helper.registerLongGauge("reads",
                 "Number of times discovery information was read",
-                ObservableUnit.OPERATIONS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getIntValue(protocol, "reads")));
     }
 }

@@ -22,27 +22,27 @@ public abstract class AbstractFlowControlMetricsInstrumentation<T extends FlowCo
         // Runtime metrics (always exposed) - common to all FlowControl protocols
         helper.registerLongCounter("credit.requests.received",
                 "Number of credit requests received from senders",
-                ObservableUnit.REQUESTS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumberOfCreditRequestsReceived()));
 
         helper.registerLongCounter("credit.requests.sent",
                 "Number of credit requests sent to receivers",
-                ObservableUnit.REQUESTS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumberOfCreditRequestsSent()));
 
         helper.registerLongCounter("credit.responses.received",
                 "Number of credit responses (replenishments) received from receivers",
-                ObservableUnit.REQUESTS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumberOfCreditResponsesReceived()));
 
         helper.registerLongCounter("credit.responses.sent",
                 "Number of credit responses (replenishments) sent to senders",
-                ObservableUnit.REQUESTS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumberOfCreditResponsesSent()));
 
         helper.registerLongGauge("blocked",
                 "Number of times flow control blocked a sender waiting for credits",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getNumberOfBlockings()));
 
         // Average time blocked - subclasses may override if unit conversion is needed
@@ -63,7 +63,7 @@ public abstract class AbstractFlowControlMetricsInstrumentation<T extends FlowCo
 
             helper.registerDoubleGauge("credits.threshold.min",
                     "Threshold (as percentage of max_credits) at which a receiver sends more credits",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(protocol.getMinThreshold()));
 
             helper.registerLongGauge("blocked.max",

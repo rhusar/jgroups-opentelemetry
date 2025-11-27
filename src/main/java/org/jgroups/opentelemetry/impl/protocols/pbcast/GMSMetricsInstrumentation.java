@@ -29,7 +29,7 @@ public class GMSMetricsInstrumentation implements MetricsInstrumentation<GMS> {
         // Runtime metrics (always exposed)
         helper.registerLongGauge("views",
                 "Total number of views installed in this member",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> {
                     Object value = Util.getField(numViewsField, protocol);
                     measurement.record(value != null ? ((Number) value).longValue() : 0);
@@ -37,37 +37,37 @@ public class GMSMetricsInstrumentation implements MetricsInstrumentation<GMS> {
 
         helper.registerLongGauge("is_coord",
                 "Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isCoord() ? 1 : 0));
 
         helper.registerLongGauge("is_leaving",
                 "Indicates whether this member is in the process of leaving (1=leaving, 0=not leaving)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isLeaving() ? 1 : 0));
 
         helper.registerLongGauge("merge.in_progress",
                 "Indicates whether a merge is currently in progress (1=merging, 0=not merging)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isMergeInProgress() ? 1 : 0));
 
         helper.registerLongGauge("merge.task.running",
                 "Indicates whether the merge task is currently running (1=running, 0=stopped)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isMergeTaskRunning() ? 1 : 0));
 
         helper.registerLongGauge("merge.killer.running",
                 "Indicates whether the merge killer task is currently running (1=running, 0=stopped)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isMergeKillerRunning() ? 1 : 0));
 
         helper.registerLongGauge("view_handler.queue",
                 "Number of queued view change requests (JOIN/LEAVE/SUSPECT) waiting to be processed",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getViewHandlerSize()));
 
         helper.registerLongGauge("view_handler.suspended",
                 "Indicates whether the view handler is suspended (1=suspended, 0=active)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isViewHandlerSuspended() ? 1 : 0));
 
         // Configuration metrics
@@ -94,7 +94,7 @@ public class GMSMetricsInstrumentation implements MetricsInstrumentation<GMS> {
 
             helper.registerLongGauge("join_attempts.max",
                     "Maximum number of join attempts before giving up and becoming singleton (0 means never give up)",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(protocol.getMaxJoinAttempts()));
         }
     }

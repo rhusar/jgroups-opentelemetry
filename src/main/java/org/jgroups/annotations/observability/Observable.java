@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  * public class UNICAST3 extends Protocol {
  *     @Observable(name = "messages.sent",
  *                 type = ObservableType.COUNTER,
- *                 unit = ObservableUnit.MESSAGES,
+ *                 unit = ObservableUnit.UNITY,
  *                 description = "Total number of unicast messages sent")
  *     protected final LongAdder num_msgs_sent = new LongAdder();
  *     // Results in metric name: jgroups.unicast3.messages.sent
@@ -64,7 +64,7 @@ public @interface Observable {
      *
      * @return The unit type
      */
-    ObservableUnit unit();
+    ObservableUnit unit() default ObservableUnit.UNITY;
 
     /**
      * An optional human-readable description of what this metric measures.

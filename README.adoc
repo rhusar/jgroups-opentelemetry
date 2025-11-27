@@ -12,7 +12,7 @@ This project provides a native OpenTelemetry exporter for JGroups that:
 
 * *Out-of-the-Box OpenTelemetry Protocol (OTLP) Export*: Drop-in OpenTelemetry metrics export for vanilla JGroups and Infinispan (library mode)
 * *Standardized Metric Names*: Exports JGroups metrics with curated, semantic naming conventions that follow OpenTelemetry best practices
-* *Defined Units*: All metrics include proper UCUM units (e.g., `s`, `ms`, `By`, `{messages}`, dimensionless, etc.) for consistent interpretation across observability platforms
+* *Defined Units*: All metrics include proper UCUM units (e.g., `s`, `ms`, `By`, dimensionless, etc.) for consistent interpretation across observability platforms
 * *Zero Configuration Observability API*: Automatically discovers and exports metrics from JGroups protocols in the stack
 * *Native Integration*: Integrates directly with the OpenTelemetry SDK without requiring JMX or external metric scrapers
 * *Extensible SPI*: Pluggable architecture using ServiceLoader allows custom protocol instrumentation to be added without modifying core code
@@ -59,7 +59,7 @@ public class OBSERVABLE_PROTOCOL extends Protocol {
     @Observable(
         name = "messages.sent", // "jgroups.observable_protocol." is prefixed automatically
         type = ObservableType.COUNTER,
-        unit = ObservableUnit.MESSAGES,
+        unit = ObservableUnit.UNITY,
         description = "Total number of unicast messages sent"
     )
     protected final LongAdder num_msgs_sent = new LongAdder();
@@ -226,12 +226,11 @@ Applies to: PING, BPING, MPING, DNS_PING, TCPPING, TCPGOSSIP, SHARED_LOOPBACK_PI
 
 |`jgroups.<protocol>.is_coord`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.ping.is_coord`, `jgroups.dns_ping.is_coord`)
+|`1`|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.ping.is_coord`, `jgroups.dns_ping.is_coord`)
 
 |`jgroups.<protocol>.discovery_requests`
 |Gauge
-|`{requests}`
+|`1`
 |Number of discovery requests sent. Discovery activity indicator. Tracks how often this node initiates discovery to find cluster members
 |===
 
@@ -246,18 +245,17 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.<protocol>.writes`
 |Gauge
-|`{operations}`
+|`1`
 |Number of times discovery information was written. Storage update frequency indicator (database, filesystem, cloud storage, etc.)
 
 |`jgroups.<protocol>.reads`
 |Gauge
-|`{operations}`
+|`1`
 |Number of times discovery information was read. Storage read frequency indicator
 
 |`jgroups.<protocol>.is_coord`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.file_ping.is_coord`, `jgroups.jdbc_ping.is_coord`)
+|`1`|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator. Protocol name is lowercase (e.g., `jgroups.file_ping.is_coord`, `jgroups.jdbc_ping.is_coord`)
 |===
 
 
@@ -269,23 +267,19 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.merge3.views.cached`
 |Gauge
-|`1` (dimensionless)
-|Number of cached ViewIds from different subgroups. Indicates potential network partitions detected
+|`1`|Number of cached ViewIds from different subgroups. Indicates potential network partitions detected
 
 |`jgroups.merge3.merge_events`
 |Counter
-|`1` (dimensionless)
-|Number of times a MERGE event was sent up the stack. Tracks merge operations initiated
+|`1`|Number of times a MERGE event was sent up the stack. Tracks merge operations initiated
 
 |`jgroups.merge3.view_consistency_checker.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the view consistency checker task is running (1=running, 0=stopped). Task activity indicator
+|`1`|Indicates whether the view consistency checker task is running (1=running, 0=stopped). Task activity indicator
 
 |`jgroups.merge3.info_sender.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the info sender task is running (1=running, 0=stopped). Task activity indicator
+|`1`|Indicates whether the info sender task is running (1=running, 0=stopped). Task activity indicator
 
 |`jgroups.merge3.interval.min`
 |Gauge (Configuration)
@@ -304,8 +298,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.merge3.max_participants_in_merge`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Maximum number of merge participants to be involved in a merge (0=unlimited)
+|`1`|Maximum number of merge participants to be involved in a merge (0=unlimited)
 |===
 
 
@@ -317,18 +310,15 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_sock.suspects`
 |Gauge
-|`1` (dimensionless)
-|Number of currently suspected members
+|`1`|Number of currently suspected members
 
 |`jgroups.fd_sock.suspect_events`
 |Counter
-|`1` (dimensionless)
-|Number of suspect events generated
+|`1`|Number of suspect events generated
 
 |`jgroups.fd_sock.monitor.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the node crash detection monitor is running (1=running, 0=stopped)
+|`1`|Indicates whether the node crash detection monitor is running (1=running, 0=stopped)
 
 |`jgroups.fd_sock.timeout.get_cache`
 |Gauge (Configuration)
@@ -347,8 +337,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_sock.cache.max_elements`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Maximum number of elements in the cache until deleted elements are removed
+|`1`|Maximum number of elements in the cache until deleted elements are removed
 
 |`jgroups.fd_sock.cache.max_age`
 |Gauge (Configuration)
@@ -357,28 +346,23 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_sock.num_tries`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Number of attempts coordinator is solicited for socket cache until we give up
+|`1`|Number of attempts coordinator is solicited for socket cache until we give up
 
 |`jgroups.fd_sock.port.start`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Start port for server socket (0 picks random port)
+|`1`|Start port for server socket (0 picks random port)
 
 |`jgroups.fd_sock.port.client_bind`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Start port for client socket (0 picks random port)
+|`1`|Start port for client socket (0 picks random port)
 
 |`jgroups.fd_sock.port.range`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Number of ports to probe for start_port and client_bind_port
+|`1`|Number of ports to probe for start_port and client_bind_port
 
 |`jgroups.fd_sock.keep_alive`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Whether to use KEEP_ALIVE on the ping socket (1=enabled, 0=disabled)
+|`1`|Whether to use KEEP_ALIVE on the ping socket (1=enabled, 0=disabled)
 |===
 
 
@@ -390,38 +374,31 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_sock2.suspects`
 |Gauge
-|`1` (dimensionless)
-|Number of currently suspected members
+|`1`|Number of currently suspected members
 
 |`jgroups.fd_sock2.suspect_events`
 |Counter
-|`1` (dimensionless)
-|Number of suspect events generated
+|`1`|Number of suspect events generated
 
 |`jgroups.fd_sock2.offset`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Offset from the transport's bind port
+|`1`|Offset from the transport's bind port
 
 |`jgroups.fd_sock2.port.range`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Number of ports to probe for finding a free port
+|`1`|Number of ports to probe for finding a free port
 
 |`jgroups.fd_sock2.port.client_bind`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Start port for client socket (0 picks random port)
+|`1`|Start port for client socket (0 picks random port)
 
 |`jgroups.fd_sock2.port.min`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Lowest port the FD_SOCK2 server can listen on
+|`1`|Lowest port the FD_SOCK2 server can listen on
 
 |`jgroups.fd_sock2.port.max`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Highest port the FD_SOCK2 server can listen on
+|`1`|Highest port the FD_SOCK2 server can listen on
 
 |`jgroups.fd_sock2.interval.suspect_msg`
 |Gauge (Configuration)
@@ -448,33 +425,29 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_all3.heartbeats.sent`
 |Counter
-|`{messages}`
+|`1`
 |Number of heartbeats sent
 
 |`jgroups.fd_all3.heartbeats.received`
 |Counter
-|`{messages}`
+|`1`
 |Number of heartbeats received
 
 |`jgroups.fd_all3.suspect_events`
 |Counter
-|`1` (dimensionless)
-|Number of suspect events sent
+|`1`|Number of suspect events sent
 
 |`jgroups.fd_all3.has_suspected_members`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether there are currently any suspected members (1=yes, 0=no)
+|`1`|Indicates whether there are currently any suspected members (1=yes, 0=no)
 
 |`jgroups.fd_all3.timeout_checker.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the timeout checker task is running (1=running, 0=stopped)
+|`1`|Indicates whether the timeout checker task is running (1=running, 0=stopped)
 
 |`jgroups.fd_all3.heartbeat_sender.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
+|`1`|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
 
 |`jgroups.fd_all3.timeout`
 |Gauge (Configuration)
@@ -488,8 +461,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_all3.num_bits`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Number of bits for each member (timeout / interval)
+|`1`|Number of bits for each member (timeout / interval)
 |===
 
 
@@ -501,33 +473,29 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_all.heartbeats.sent`
 |Counter
-|`{messages}`
+|`1`
 |Number of heartbeats sent
 
 |`jgroups.fd_all.heartbeats.received`
 |Counter
-|`{messages}`
+|`1`
 |Number of heartbeats received
 
 |`jgroups.fd_all.suspect_events`
 |Counter
-|`1` (dimensionless)
-|Number of suspect events sent
+|`1`|Number of suspect events sent
 
 |`jgroups.fd_all.has_suspected_members`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether there are currently any suspected members (1=yes, 0=no)
+|`1`|Indicates whether there are currently any suspected members (1=yes, 0=no)
 
 |`jgroups.fd_all.timeout_checker.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the timeout checker task is running (1=running, 0=stopped)
+|`1`|Indicates whether the timeout checker task is running (1=running, 0=stopped)
 
 |`jgroups.fd_all.heartbeat_sender.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
+|`1`|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
 
 |`jgroups.fd_all.timeout`
 |Gauge (Configuration)
@@ -546,8 +514,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_all.use_time_service`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Whether to use TimeService for timestamps (1=enabled, 0=disabled)
+|`1`|Whether to use TimeService for timestamps (1=enabled, 0=disabled)
 |===
 
 
@@ -559,33 +526,29 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_all2.heartbeats.sent`
 |Counter
-|`{messages}`
+|`1`
 |Number of heartbeats sent
 
 |`jgroups.fd_all2.heartbeats.received`
 |Counter
-|`{messages}`
+|`1`
 |Number of heartbeats received
 
 |`jgroups.fd_all2.suspect_events`
 |Counter
-|`1` (dimensionless)
-|Number of suspect events sent
+|`1`|Number of suspect events sent
 
 |`jgroups.fd_all2.has_suspected_members`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether there are currently any suspected members (1=yes, 0=no)
+|`1`|Indicates whether there are currently any suspected members (1=yes, 0=no)
 
 |`jgroups.fd_all2.timeout_checker.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the timeout checker task is running (1=running, 0=stopped)
+|`1`|Indicates whether the timeout checker task is running (1=running, 0=stopped)
 
 |`jgroups.fd_all2.heartbeat_sender.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
+|`1`|Indicates whether the heartbeat sender task is running (1=running, 0=stopped)
 
 |`jgroups.fd_all2.timeout`
 |Gauge (Configuration)
@@ -607,13 +570,12 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.verify_suspect2.suspects`
 |Gauge
-|`{members}`
+|`1`
 |Number of currently suspected members being verified. *Critical*: Indicates members under suspicion verification
 
 |`jgroups.verify_suspect2.verification_task_running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the verification task is currently running (1=running, 0=stopped). Task activity indicator
+|`1`|Indicates whether the verification task is currently running (1=running, 0=stopped). Task activity indicator
 |===
 
 
@@ -625,67 +587,67 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.unicast3.messages.sent`
 |Counter
-|`{messages}`
+|`1`
 |Total number of unicast messages sent. Throughput indicator for outgoing traffic
 
 |`jgroups.unicast3.messages.received`
 |Counter
-|`{messages}`
+|`1`
 |Total number of unicast messages received. Throughput indicator for incoming traffic
 
 |`jgroups.unicast3.retransmissions`
 |Counter
-|`{messages}`
+|`1`
 |Number of messages retransmitted. *Critical*: High values indicate network packet loss or congestion
 
 |`jgroups.unicast3.xmit_requests.sent`
 |Counter
-|`{requests}`
+|`1`
 |Number of retransmit requests sent to other nodes. Indicates this node detected missing messages from senders
 
 |`jgroups.unicast3.xmit_requests.received`
 |Counter
-|`{requests}`
+|`1`
 |Number of retransmit requests received from other nodes. Indicates other nodes are detecting packet loss from this node
 
 |`jgroups.unicast3.acks.sent`
 |Counter
-|`{acks}`
+|`1`
 |Number of acknowledgments sent. Protocol overhead metric
 
 |`jgroups.unicast3.acks.received`
 |Counter
-|`{acks}`
+|`1`
 |Number of acknowledgments received. Protocol overhead metric
 
 |`jgroups.unicast3.connections`
 |Gauge
-|`{connections}`
+|`1`
 |Total number of connections. Connection pool size (send + receive)
 
 |`jgroups.unicast3.connections.send`
 |Gauge
-|`{connections}`
+|`1`
 |Number of active outgoing send connections. Connection pool size for sends
 
 |`jgroups.unicast3.connections.receive`
 |Gauge
-|`{connections}`
+|`1`
 |Number of active incoming receive connections. Connection pool size for receives
 
 |`jgroups.unicast3.messages.unacked`
 |Gauge
-|`{messages}`
+|`1`
 |Number of unacknowledged messages in send windows. *Critical*: Indicates backpressure or slow receivers
 
 |`jgroups.unicast3.xmit_table.missing_messages`
 |Gauge
-|`{messages}`
+|`1`
 |Number of missing (not yet received) messages in receive windows. *Critical*: Indicates gaps in message sequence
 
 |`jgroups.unicast3.xmit_table.undelivered_messages`
 |Gauge
-|`{messages}`
+|`1`
 |Total undelivered messages buffered in all receive windows. Memory pressure and delivery lag indicator
 |===
 
@@ -698,22 +660,22 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.pbcast.stable.stable.sent`
 |Counter
-|`{messages}`
+|`1`
 |Number of STABLE messages sent (digest reports to coordinator).
 
 |`jgroups.pbcast.stable.stable.received`
 |Counter
-|`{messages}`
+|`1`
 |Number of STABLE messages received (digest reports from members).
 
 |`jgroups.pbcast.stable.stability.sent`
 |Counter
-|`{messages}`
+|`1`
 |Number of STABILITY messages sent (garbage collection triggers).
 
 |`jgroups.pbcast.stable.stability.received`
 |Counter
-|`{messages}`
+|`1`
 |Number of STABILITY messages received (garbage collection triggers).
 
 |`jgroups.pbcast.stable.bytes.received`
@@ -723,18 +685,15 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.pbcast.stable.votes`
 |Gauge
-|`1` (dimensionless)
-|Number of STABLE votes received for current digest.
+|`1`|Number of STABLE votes received for current digest.
 
 |`jgroups.pbcast.stable.suspended`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether garbage collection is suspended (1=suspended, 0=active).
+|`1`|Indicates whether garbage collection is suspended (1=suspended, 0=active).
 
 |`jgroups.pbcast.stable.stable_task.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the stable task is running (1=running, 0=stopped).
+|`1`|Indicates whether the stable task is running (1=running, 0=stopped).
 
 |`jgroups.pbcast.stable.gossip.avg`
 |Gauge (Configuration)
@@ -755,43 +714,35 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.pbcast.gms.views`
 |Gauge
-|`1` (dimensionless)
-|Total number of views installed in this member. View installation tracking indicator
+|`1`|Total number of views installed in this member. View installation tracking indicator
 
 |`jgroups.pbcast.gms.is_coord`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator
+|`1`|Indicates whether this member is the current coordinator (1=coordinator, 0=not coordinator). Cluster coordination indicator
 
 |`jgroups.pbcast.gms.is_leaving`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether this member is in the process of leaving (1=leaving, 0=not leaving). Member departure indicator
+|`1`|Indicates whether this member is in the process of leaving (1=leaving, 0=not leaving). Member departure indicator
 
 |`jgroups.pbcast.gms.merge.in_progress`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether a merge is currently in progress (1=merging, 0=not merging). *Critical*: Merge activity indicator
+|`1`|Indicates whether a merge is currently in progress (1=merging, 0=not merging). *Critical*: Merge activity indicator
 
 |`jgroups.pbcast.gms.merge.task.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the merge task is currently running (1=running, 0=stopped). Merge task activity indicator
+|`1`|Indicates whether the merge task is currently running (1=running, 0=stopped). Merge task activity indicator
 
 |`jgroups.pbcast.gms.merge.killer.running`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the merge killer task is currently running (1=running, 0=stopped). Merge timeout task activity indicator
+|`1`|Indicates whether the merge killer task is currently running (1=running, 0=stopped). Merge timeout task activity indicator
 
 |`jgroups.pbcast.gms.view_handler.queue`
 |Gauge
-|`1` (dimensionless)
-|Number of queued view change requests (JOIN/LEAVE/SUSPECT) waiting to be processed. *Critical*: High values indicate processing backlog
+|`1`|Number of queued view change requests (JOIN/LEAVE/SUSPECT) waiting to be processed. *Critical*: High values indicate processing backlog
 
 |`jgroups.pbcast.gms.view_handler.suspended`
 |Gauge
-|`1` (dimensionless)
-|Indicates whether the view handler is suspended (1=suspended, 0=active). Handler activity indicator
+|`1`|Indicates whether the view handler is suspended (1=suspended, 0=active). Handler activity indicator
 
 |`jgroups.pbcast.gms.timeout.join`
 |Gauge (Configuration)
@@ -815,8 +766,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.pbcast.gms.join_attempts.max`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Maximum number of join attempts before giving up and becoming singleton (0 means never give up)
+|`1`|Maximum number of join attempts before giving up and becoming singleton (0 means never give up)
 |===
 
 
@@ -828,28 +778,27 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.ufc.credit.requests.received`
 |Counter
-|`{requests}`
+|`1`
 |Number of credit requests received from senders
 
 |`jgroups.ufc.credit.requests.sent`
 |Counter
-|`{requests}`
+|`1`
 |Number of credit requests sent to receivers
 
 |`jgroups.ufc.credit.responses.received`
 |Counter
-|`{requests}`
+|`1`
 |Number of credit responses (replenishments) received from receivers
 
 |`jgroups.ufc.credit.responses.sent`
 |Counter
-|`{requests}`
+|`1`
 |Number of credit responses (replenishments) sent to senders
 
 |`jgroups.ufc.blocked`
 |Gauge
-|`1` (dimensionless)
-|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
+|`1`|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
 
 |`jgroups.ufc.blocked.avg`
 |Gauge
@@ -868,8 +817,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.ufc.credits.threshold.min`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Threshold (as percentage of max_credits) at which a receiver sends more credits
+|`1`|Threshold (as percentage of max_credits) at which a receiver sends more credits
 
 |`jgroups.ufc.blocked.max`
 |Gauge (Configuration)
@@ -886,28 +834,27 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.mfc.credit.requests.received`
 |Counter
-|`{requests}`
+|`1`
 |Number of credit requests received from senders
 
 |`jgroups.mfc.credit.requests.sent`
 |Counter
-|`{requests}`
+|`1`
 |Number of credit requests sent to receivers
 
 |`jgroups.mfc.credit.responses.received`
 |Counter
-|`{requests}`
+|`1`
 |Number of credit responses (replenishments) received from receivers
 
 |`jgroups.mfc.credit.responses.sent`
 |Counter
-|`{requests}`
+|`1`
 |Number of credit responses (replenishments) sent to senders
 
 |`jgroups.mfc.blocked`
 |Gauge
-|`1` (dimensionless)
-|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
+|`1`|Number of times flow control blocked a sender waiting for credits. *Critical*: High values indicate backpressure
 
 |`jgroups.mfc.blocked.avg`
 |Gauge
@@ -926,8 +873,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.mfc.credits.threshold.min`
 |Gauge (Configuration)
-|`1` (dimensionless)
-|Threshold (as percentage of max_credits) at which a receiver sends more credits
+|`1`|Threshold (as percentage of max_credits) at which a receiver sends more credits
 
 |`jgroups.mfc.blocked.max`
 |Gauge (Configuration)

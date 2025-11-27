@@ -24,32 +24,32 @@ public class FD_ALL3MetricsInstrumentation implements MetricsInstrumentation<FD_
         // Runtime metrics (always exposed)
         helper.registerLongCounter("heartbeats.sent",
                 "Number of heartbeats sent",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getHeartbeatsSent()));
 
         helper.registerLongCounter("heartbeats.received",
                 "Number of heartbeats received",
-                ObservableUnit.MESSAGES,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getHeartbeatsReceived()));
 
         helper.registerLongCounter("suspect_events",
                 "Number of suspect events sent",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.getSuspectEventsSent()));
 
         helper.registerLongGauge("has_suspected_members",
                 "Indicates whether there are currently any suspected members (1=yes, 0=no)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(ReflectionHelper.getBooleanValue(protocol, "has_suspected_mbrs") ? 1 : 0));
 
         helper.registerLongGauge("timeout_checker.running",
                 "Indicates whether the timeout checker task is running (1=running, 0=stopped)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isTimeoutCheckerRunning() ? 1 : 0));
 
         helper.registerLongGauge("heartbeat_sender.running",
                 "Indicates whether the heartbeat sender task is running (1=running, 0=stopped)",
-                ObservableUnit.DIMENSIONLESS,
+                ObservableUnit.UNITY,
                 measurement -> measurement.record(protocol.isHeartbeatSenderRunning() ? 1 : 0));
 
         // Configuration metrics
@@ -66,7 +66,7 @@ public class FD_ALL3MetricsInstrumentation implements MetricsInstrumentation<FD_
 
             helper.registerLongGauge("num_bits",
                     "Number of bits for each member (timeout / interval)",
-                    ObservableUnit.DIMENSIONLESS,
+                    ObservableUnit.UNITY,
                     measurement -> measurement.record(ReflectionHelper.getIntValue(protocol, "num_bits")));
         }
     }

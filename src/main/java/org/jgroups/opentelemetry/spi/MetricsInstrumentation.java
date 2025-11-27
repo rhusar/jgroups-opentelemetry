@@ -27,7 +27,7 @@ import java.lang.reflect.Type;
  *         // Register metrics using asynchronous callbacks
  *         context.registerLongGauge("messages.sent",
  *             "Total number of unicast messages sent",
- *             "{messages}",
+ *             "1",
  *             measurement -> {
  *                 measurement.record(ReflectionHelper.getLongAdderValue(unicast3, "num_msgs_sent", log));
  *             });
