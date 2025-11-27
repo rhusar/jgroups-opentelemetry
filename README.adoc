@@ -277,17 +277,17 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.merge3.interval.min`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Minimum time in milliseconds before sending an info message
 
 |`jgroups.merge3.interval.max`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Maximum interval in milliseconds when the next info message will be sent
 
 |`jgroups.merge3.interval.check`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Interval in milliseconds after which we check for view inconsistencies
 
 |`jgroups.merge3.max_participants_in_merge`
@@ -320,17 +320,17 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_sock.timeout.get_cache`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Timeout for getting socket cache from coordinator
 
 |`jgroups.fd_sock.timeout.sock_conn`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Maximum time to wait for ping Socket.connect() to return
 
 |`jgroups.fd_sock.interval.suspect_msg`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Interval for broadcasting suspect messages
 
 |`jgroups.fd_sock.cache.max_elements`
@@ -340,7 +340,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_sock.cache.max_age`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Maximum age an element marked as removed has to have until it is removed
 
 |`jgroups.fd_sock.num_tries`
@@ -413,17 +413,17 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_sock2.interval.suspect_msg`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Interval for broadcasting suspect messages
 
 |`jgroups.fd_sock2.timeout.connect`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Maximum time to wait for a connect attempt
 
 |`jgroups.fd_sock2.linger`
 |Gauge (Configuration)
-|`{seconds}`
+|`s`
 |SO_LINGER in seconds (-1 disables it)
 |===
 
@@ -466,12 +466,12 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_all3.timeout`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Timeout after which a node is suspected if no heartbeat or data received
 
 |`jgroups.fd_all3.interval`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Interval at which a heartbeat is sent to the cluster
 
 |`jgroups.fd_all3.num_bits`
@@ -519,17 +519,17 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_all.timeout`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Timeout after which a node is suspected if no heartbeat or data received
 
 |`jgroups.fd_all.interval`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Interval at which a heartbeat is sent to the cluster
 
 |`jgroups.fd_all.timeout_check_interval`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Interval at which the heartbeat timeouts are checked
 
 |`jgroups.fd_all.use_time_service`
@@ -577,12 +577,12 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.fd_all2.timeout`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Timeout after which a node is suspected if no heartbeat or data received
 
 |`jgroups.fd_all2.interval`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Interval at which a heartbeat is sent to the cluster
 |===
 
@@ -726,7 +726,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.pbcast.stable.gossip.avg`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Average interval in milliseconds between STABLE gossip messages (0 disables periodic gossip)
 
 |`jgroups.pbcast.stable.bytes.max`
@@ -783,22 +783,22 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.pbcast.gms.timeout.join`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Timeout in milliseconds for join operations
 
 |`jgroups.pbcast.gms.timeout.leave`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Timeout in milliseconds for leave operations
 
 |`jgroups.pbcast.gms.timeout.merge`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Timeout in milliseconds to complete merge operations
 
 |`jgroups.pbcast.gms.timeout.view_ack_collection`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Timeout in milliseconds to wait for all VIEW acks (0 means wait forever)
 
 |`jgroups.pbcast.gms.join_attempts.max`
@@ -861,7 +861,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.ufc.blocked.max`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Maximum time in milliseconds to block waiting for credits before sending a replenishment request
 |===
 
@@ -919,7 +919,7 @@ Applies to: FILE_PING, JDBC_PING, JDBC_PING2, RACKSPACE_PING, SWIFT_PING
 
 |`jgroups.mfc.blocked.max`
 |Gauge (Configuration)
-|`{milliseconds}`
+|`ms`
 |Maximum time in milliseconds to block waiting for credits before sending a replenishment request
 |===
 
