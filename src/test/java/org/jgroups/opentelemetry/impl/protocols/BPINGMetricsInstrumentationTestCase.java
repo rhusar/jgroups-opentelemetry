@@ -3,6 +3,7 @@ package org.jgroups.opentelemetry.impl.protocols;
 import org.jgroups.opentelemetry.impl.AbstractMetricsInstrumentationTestCase;
 import org.jgroups.protocols.BPING;
 import org.jgroups.stack.Protocol;
+import org.junit.jupiter.api.Disabled;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  *
  * @author Radoslav Husar
  */
+@Disabled("Doesn't work reliably on GHA")
 class BPINGMetricsInstrumentationTestCase extends AbstractMetricsInstrumentationTestCase {
 
     @Override

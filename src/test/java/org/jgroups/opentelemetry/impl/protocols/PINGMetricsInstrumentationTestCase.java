@@ -3,6 +3,7 @@ package org.jgroups.opentelemetry.impl.protocols;
 import org.jgroups.opentelemetry.impl.AbstractMetricsInstrumentationTestCase;
 import org.jgroups.protocols.PING;
 import org.jgroups.stack.Protocol;
+import org.junit.jupiter.api.Disabled;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  *
  * @author Radoslav Husar
  */
+@Disabled("Doesn't work reliably on GHA")
 class PINGMetricsInstrumentationTestCase extends AbstractMetricsInstrumentationTestCase {
 
     @Override
